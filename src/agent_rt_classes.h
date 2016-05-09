@@ -33,9 +33,15 @@
 #include "../include/agent_rt.h"
 
 //  Internal API
+#include "logger.h"
 
 //  *** To avoid double-definitions, only define if building without draft ***
 #ifndef AGENT_RT_BUILD_DRAFT_API
+
+//  *** Draft method, defined for internal use only ***
+//  Self test of this class.
+AGENT_RT_EXPORT void
+    logger_test (bool verbose);
 
 #endif // AGENT_RT_BUILD_DRAFT_API
 

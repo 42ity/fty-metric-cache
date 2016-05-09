@@ -32,6 +32,7 @@ noinst_LTLIBRARIES =
 TESTS =
 
 EXTRA_DIST = \
+    src/logger.h \
     src/agent_rt_classes.h
 
 include $(srcdir)/src/Makemodule.am
