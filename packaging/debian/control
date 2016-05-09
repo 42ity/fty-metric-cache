@@ -1,0 +1,69 @@
+#
+#    agent-rt - Knows current values of any METRIC in the system
+#
+#    Copyright (C) 2014 - 2015 Eaton                                        
+#                                                                           
+#    This program is free software; you can redistribute it and/or modify   
+#    it under the terms of the GNU General Public License as published by   
+#    the Free Software Foundation; either version 2 of the License, or      
+#    (at your option) any later version.                                    
+#                                                                           
+#    This program is distributed in the hope that it will be useful,        
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of         
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          
+#    GNU General Public License for more details.                           
+#                                                                           
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.            
+
+Source:         agent-rt
+Section:        net
+Priority:       optional
+Maintainer:     agent-rt Developers <bios@eaton.com>
+Standards-Version: 3.9.7
+Build-Depends: debhelper (>= 9),
+    pkg-config,
+    dh-autoreconf,
+    libzmq5-dev,
+    libczmq-dev,
+    libmlm-dev,
+    libbiosproto-dev,
+    dh-autoreconf,
+    systemd,
+    dh-systemd
+
+Package: libagent-rt0
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: agent-rt
+ This package contains shared library for agent-rt: knows current values of any metric in the system
+
+Package: libagent-rt-dev
+Architecture: any
+Section: libdevel
+Depends:
+    libzmq5-dev,
+    libczmq-dev,
+    libmlm-dev,
+    libbiosproto-dev,
+    libagent-rt0 (= ${binary:Version})
+Description: development files for agent-rt
+ This package contains development files for agent-rt: knows current values of any metric in the system
+
+Package: agent-rt
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: knows current values of any metric in the system
+ Main package for agent-rt: knows current values of any metric in the system
+
+Package: agent-rt-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends:
+    agent-rt (= ${binary:Version}),
+    ${misc:Depends}
+Description: debugging symbols for agent-rt
+ This package contains the debugging symbols for agent-rt : knows current values of any metric in the system.
+

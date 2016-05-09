@@ -1,0 +1,35 @@
+<project
+    name = "agent-rt"
+    description = "Knows current values of any METRIC in the system"
+    script = "zproject.gsl"
+    email = "bios@eaton.com"
+    url = "https://eaton.com/"
+    license = "GPL-2.0+"
+    >
+
+    <target name = "debian" />
+    <target name = "redhat" />
+
+    <include filename = "license.xml" />
+    <version major = "0" minor = "1" patch = "0" />
+
+
+    <use project = "malamute" />
+
+    <use project = "biosproto" libname = "libbiosproto" prefix="biosproto"
+        min_major = "0" min_minor = "0" min_patch = "0"
+        repository = "https://stash.mbt.lab.etn.com/BIOS/libbiosproto"
+        test = "bios_proto_test">
+        <use project = "malamute"/>
+    </use>
+
+
+    <class name = "bios-agent-rt-server" state = "stable">
+        Actor listening on metrics with request reply protocol
+    </class>
+
+    <main name = "bios-agent-rt" service = "1" no_config = "1">
+        Listens on all metrics in order to remeber the last ones.
+    </main>
+
+</project>
