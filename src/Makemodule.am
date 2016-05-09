@@ -18,6 +18,7 @@ include_HEADERS = \
     include/agent_rt_library.h
 
 src_libagent_rt_la_SOURCES = \
+    src/logger.cc \
     src/bios_agent_rt_server.cc \
     src/platform.h
 

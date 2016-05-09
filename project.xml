@@ -23,6 +23,7 @@
         <use project = "malamute"/>
     </use>
 
+    <class name = "logger"          private = "1">logging api</class>
 
     <class name = "bios-agent-rt-server" state = "stable">
         Actor listening on metrics with request reply protocol
