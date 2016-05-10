@@ -18,12 +18,13 @@ include_HEADERS = \
     include/agent_rt_library.h
 
 src_libagent_rt_la_SOURCES = \
-    src/logger.cc \
-    src/bios_agent_rt_server.cc \
+    src/logger.c \
+    src/actor_commands.c \
+    src/rt.c \
+    src/bios_agent_rt_server.c \
     src/platform.h
 
 src_libagent_rt_la_CPPFLAGS = ${AM_CPPFLAGS}
-src_libagent_rt_la_CXXFLAGS = ${AM_CXXFLAGS}
 
 src_libagent_rt_la_LDFLAGS = \
     -version-info @LTVER@ \
@@ -47,7 +48,7 @@ if ENABLE_BIOS_AGENT_RT
 bin_PROGRAMS += src/bios-agent-rt
 src_bios_agent_rt_CPPFLAGS = ${AM_CPPFLAGS}
 src_bios_agent_rt_LDADD = ${program_libs}
-src_bios_agent_rt_SOURCES = src/bios_agent_rt.cc
+src_bios_agent_rt_SOURCES = src/bios_agent_rt.c
 src_bios_agent_rt_config_DATA = src/bios-agent-rt.cfg
 src_bios_agent_rt_configdir = $(sysconfdir)/agent-rt
 if WITH_SYSTEMD_UNITS
@@ -61,7 +62,7 @@ check_PROGRAMS += src/agent_rt_selftest
 noinst_PROGRAMS += src/agent_rt_selftest
 src_agent_rt_selftest_CPPFLAGS = ${AM_CPPFLAGS}
 src_agent_rt_selftest_LDADD = ${program_libs}
-src_agent_rt_selftest_SOURCES = src/agent_rt_selftest.cc
+src_agent_rt_selftest_SOURCES = src/agent_rt_selftest.c
 endif #ENABLE_AGENT_RT_SELFTEST
 
 # define custom target for all products of /src
