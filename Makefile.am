@@ -8,16 +8,12 @@ ACLOCAL_AMFLAGS = -I config
 AM_CFLAGS = \
     -Werror=format-security
 
-AM_CXXFLAGS = \
-    -Werror=format-security \
-    -std=c++11
 
 AM_CPPFLAGS = \
     ${libzmq_CFLAGS} \
     ${czmq_CFLAGS} \
     ${malamute_CFLAGS} \
     ${biosproto_CFLAGS} \
-    -D__STDC_FORMAT_MACROS \
     -I$(srcdir)/include
 
 project_libs = ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${biosproto_LIBS}
@@ -33,6 +29,8 @@ TESTS =
 
 EXTRA_DIST = \
     src/logger.h \
+    src/actor_commands.h \
+    src/rt.h \
     src/agent_rt_classes.h
 
 include $(srcdir)/src/Makemodule.am
