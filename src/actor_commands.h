@@ -34,14 +34,14 @@ extern "C" {
 //
 //  CONNECT/enpoint/name
 //      connect to malamute broker on 'endpoint' registering as 'name'
-//      
+//
 //  PRODUCER/stream
 //      publish to specified 'stream'
 //
 //  CONSUMER/stream/pattern
 //      consume messages from 'stream' with subjects matching 'pattern'
 //
-//  CONFIGURE/config_file           
+//  CONFIGURE/config_file
 //      configure actor, where
 //      config_file - full path to mapping file
 //  ^^^ NOT IMPLEMETED YET - command logic is empty
