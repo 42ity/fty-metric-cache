@@ -31,7 +31,8 @@
 //  Structure of our class
 
 struct _rt_t {
-    int filler;     //  Declare class properties here
+    char *device;     //  Declare class properties here
+    zhashx_t *metrics;
 };
 
 
@@ -43,7 +44,12 @@ rt_new (void)
 {
     rt_t *self = (rt_t *) zmalloc (sizeof (rt_t));
     assert (self);
-    //  Initialize class properties here
+    
+    self->device = NULL;
+    self->metrics = zhashx_new();
+    assert(self->metrics);
+    zhashx_set_destructor(self->metrics, bios_proto_destroy);
+    
     return self;
 }
 

@@ -41,9 +41,13 @@ AGENT_RT_EXPORT void
 AGENT_RT_EXPORT bios_proto_t *
     rt_get (rt_t *self, const char *device, const char *metric);
 
+//  Read all
+AGENT_RT_EXPORT zhashx_t *
+    rt_get_device (rt_t *self, const char *device);
+
 // Purge
-AGENT_RT_EXPORT void
-    rt_purge (rt_t *self, const char *device, const char *metric);
+//AGENT_RT_EXPORT void
+//    rt_purge (rt_t *self, const char *device, const char *metric);
 
 //  Print
 AGENT_RT_EXPORT void
