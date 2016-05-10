@@ -48,7 +48,7 @@ rt_new (void)
     self->device = NULL;
     self->metrics = zhashx_new();
     assert(self->metrics);
-    zhashx_set_destructor(self->metrics, bios_proto_destroy);
+    zhashx_set_destructor(self->metrics, (zhashx_destructor_fn *) bios_proto_destroy);
     
     return self;
 }
@@ -68,6 +68,20 @@ rt_destroy (rt_t **self_p)
         free (self);
         *self_p = NULL;
     }
+}
+
+//  --------------------------------------------------------------------------
+//  Store bios_proto_t message and destroy it
+void
+rt_put (rt_t *self, bios_proto_t **msg_p)
+{
+}
+
+//  --------------------------------------------------------------------------
+//  Print
+void
+rt_print (rt_t *self)
+{
 }
 
 //  --------------------------------------------------------------------------
