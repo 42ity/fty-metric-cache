@@ -32,9 +32,11 @@
 
 struct _rt_t {
     zhashx_t *hash;
-    //void (*print)(rt_t*);
+    void (*print)(rt_t*);
 };
 
+void
+rt_print_metrics (rt_t *self);
 //  --------------------------------------------------------------------------
 //  Create a new rt
 
@@ -47,7 +49,7 @@ rt_new (void)
     self->hash = zhashx_new();
     assert(self->hash);
     zhashx_set_destructor(self->hash, (zhashx_destructor_fn *) rt_destroy);
-    
+    self->print = rt_print;
     return self;
 }
 
@@ -82,7 +84,7 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
 	device->hash = zhashx_new();
 	assert(device->hash);
 	zhashx_set_destructor(device->hash, (zhashx_destructor_fn *) bios_proto_destroy);
-	
+	device->print = rt_print_metrics;
 	zhashx_insert(device->hash, bios_proto_type(*msg_p), *msg_p);
 	zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
 	
@@ -101,7 +103,34 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
 void
 rt_print (rt_t *self)
 {
-  printf("----------------------\n");
+  printf("hola!!!!!\n");
+  if(self->hash){
+    rt_t *aux =(rt_t*) zhashx_first (self->hash);
+    printf ("Device: %s\n",(char *) zhashx_cursor (self->hash));
+    
+    if(aux->print)aux->print(aux);
+    while((aux =(rt_t*) zhashx_next(self->hash))){
+      printf ("Device: %s\n",(char *) zhashx_cursor (self->hash));
+      if(aux->print)aux->print(aux);
+    }
+    
+  }
+}
+
+void
+rt_print_metrics (rt_t *self)
+{
+  if(self->hash){
+    bios_proto_t *aux =(bios_proto_t*) zhashx_first (self->hash);
+    printf ("Metric: %s\n",(char *) zhashx_cursor (self->hash));
+    if(aux) bios_proto_print(aux);
+    
+    while((aux =(bios_proto_t*) zhashx_next(self->hash))){
+      printf ("Device: %s\n",(char *) zhashx_cursor (self->hash));
+      if(aux) bios_proto_print(aux);
+    }
+    
+  }
 }
 
 //  --------------------------------------------------------------------------
