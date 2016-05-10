@@ -31,8 +31,7 @@
 //  Structure of our class
 
 struct _rt_t {
-    char *device;     //  Declare class properties here
-    zhashx_t *metrics;
+    zhashx_t *hash;
 };
 
 
@@ -45,10 +44,9 @@ rt_new (void)
     rt_t *self = (rt_t *) zmalloc (sizeof (rt_t));
     assert (self);
     
-    self->device = NULL;
-    self->metrics = zhashx_new();
-    assert(self->metrics);
-    zhashx_set_destructor(self->metrics, (zhashx_destructor_fn *) bios_proto_destroy);
+    self->hash = zhashx_new();
+    assert(self->hash);
+    zhashx_set_destructor(self->hash, (zhashx_destructor_fn *) bios_proto_destroy);
     
     return self;
 }
@@ -75,6 +73,27 @@ rt_destroy (rt_t **self_p)
 void
 rt_put (rt_t *self, bios_proto_t **msg_p)
 {
+    assert(is_bios_proto(bios_proto_encode(msg_p)));
+    rt_t *device = NULL;
+    device =(rt_t*) zhashx_lookup(self->hash, bios_proto_element_src(*msg_p));
+    if(!device){
+        device = (rt_t *) zmalloc (sizeof (rt_t));
+        assert(device);
+	device->hash = zhashx_new();
+	assert(device->hash);
+	zhashx_set_destructor(device->hash, (zhashx_destructor_fn *) bios_proto_destroy);
+	
+	zhashx_insert(device->hash, bios_proto_type(*msg_p), *msg_p);
+	zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
+	
+        
+    } else {
+        bios_proto_t *metric = NULL;
+	metric =(bios_proto_t*) zhashx_lookup(device->hash, bios_proto_type(*msg_p));
+	if(!metric)
+	    zhashx_insert(device->hash, bios_proto_type(*msg_p), *msg_p);
+	else zsys_debug("element already exist\n");
+    }
 }
 
 //  --------------------------------------------------------------------------
