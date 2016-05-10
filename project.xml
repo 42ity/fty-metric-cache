@@ -25,6 +25,7 @@
 
     <class name = "logger"          private = "1">logging api</class>
     <class name = "actor commands"  private = "1">actor commands</class>
+    <class name = "rt"              private = "1">agent rt structure</class>
 
     <class name = "bios-agent-rt-server" state = "stable">
         Actor listening on metrics with request reply protocol
