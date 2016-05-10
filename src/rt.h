@@ -1,5 +1,5 @@
 /*  =========================================================================
-    bios_agent_rt_server - Actor listening on metrics with request reply protocol
+    rt - agent rt structure
 
     Copyright (C) 2014 - 2015 Eaton                                        
                                                                            
@@ -19,22 +19,43 @@
     =========================================================================
 */
 
-#ifndef BIOS_AGENT_RT_SERVER_H_INCLUDED
-#define BIOS_AGENT_RT_SERVER_H_INCLUDED
+#ifndef RT_H_INCLUDED
+#define RT_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//  @interface
+typedef struct _rt_t rt_t;
 
-//  Agent rt actor
+//  @interface
+//  Create a new rt
+AGENT_RT_EXPORT rt_t *
+    rt_new (void);
+
+//  Store bios_proto_t message and destroy it
 AGENT_RT_EXPORT void
-    bios_agent_rt_server (zsock_t *pipe, void *args);
+    rt_put (rt_t *self, bios_proto_t **msg_p);
+
+//  Read
+AGENT_RT_EXPORT bios_proto_t *
+    rt_get (rt_t *self, const char *device, const char *metric);
+
+// Purge
+AGENT_RT_EXPORT void
+    rt_purge (rt_t *self, const char *device, const char *metric);
+
+//  Print
+AGENT_RT_EXPORT void
+    rt_print (rt_t *self);
+
+//  Destroy the rt
+AGENT_RT_EXPORT void
+    rt_destroy (rt_t **self_p);
 
 //  Self test of this class
 AGENT_RT_EXPORT void
-    bios_agent_rt_server_test (bool verbose);
+    rt_test (bool verbose);
 
 //  @end
 

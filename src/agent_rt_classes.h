@@ -35,6 +35,7 @@
 //  Internal API
 #include "logger.h"
 #include "actor_commands.h"
+#include "rt.h"
 
 //  *** To avoid double-definitions, only define if building without draft ***
 #ifndef AGENT_RT_BUILD_DRAFT_API
@@ -48,6 +49,11 @@ AGENT_RT_EXPORT void
 //  Self test of this class.
 AGENT_RT_EXPORT void
     actor_commands_test (bool verbose);
+
+//  *** Draft method, defined for internal use only ***
+//  Self test of this class.
+AGENT_RT_EXPORT void
+    rt_test (bool verbose);
 
 #endif // AGENT_RT_BUILD_DRAFT_API
 

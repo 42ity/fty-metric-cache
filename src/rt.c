@@ -1,5 +1,5 @@
 /*  =========================================================================
-    bios_agent_rt_server - Actor listening on metrics with request reply protocol
+    rt - agent rt structure
 
     Copyright (C) 2014 - 2015 Eaton                                        
                                                                            
@@ -19,27 +19,64 @@
     =========================================================================
 */
 
-#ifndef BIOS_AGENT_RT_SERVER_H_INCLUDED
-#define BIOS_AGENT_RT_SERVER_H_INCLUDED
+/*
+@header
+    rt - agent rt structure
+@discuss
+@end
+*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "agent_rt_classes.h"
 
-//  @interface
+//  Structure of our class
 
-//  Agent rt actor
-AGENT_RT_EXPORT void
-    bios_agent_rt_server (zsock_t *pipe, void *args);
+struct _rt_t {
+    int filler;     //  Declare class properties here
+};
 
-//  Self test of this class
-AGENT_RT_EXPORT void
-    bios_agent_rt_server_test (bool verbose);
 
-//  @end
+//  --------------------------------------------------------------------------
+//  Create a new rt
 
-#ifdef __cplusplus
+rt_t *
+rt_new (void)
+{
+    rt_t *self = (rt_t *) zmalloc (sizeof (rt_t));
+    assert (self);
+    //  Initialize class properties here
+    return self;
 }
-#endif
 
-#endif
+
+//  --------------------------------------------------------------------------
+//  Destroy the rt
+
+void
+rt_destroy (rt_t **self_p)
+{
+    assert (self_p);
+    if (*self_p) {
+        rt_t *self = *self_p;
+        //  Free class properties here
+        //  Free object itself
+        free (self);
+        *self_p = NULL;
+    }
+}
+
+//  --------------------------------------------------------------------------
+//  Self test of this class
+
+void
+rt_test (bool verbose)
+{
+    printf (" * rt: ");
+
+    //  @selftest
+    //  Simple create/destroy test
+    rt_t *self = rt_new ();
+    assert (self);
+    rt_destroy (&self);
+    //  @end
+    printf ("OK\n");
+}
