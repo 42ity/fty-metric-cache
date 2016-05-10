@@ -26,16 +26,33 @@
 extern "C" {
 #endif
 
-typedef struct _actor_commands_t actor_commands_t;
-
 //  @interface
-//  Create a new actor_commands
-AGENT_RT_EXPORT actor_commands_t *
-    actor_commands_new (void);
 
-//  Destroy the actor_commands
-AGENT_RT_EXPORT void
-    actor_commands_destroy (actor_commands_t **self_p);
+// Supported actor commands:
+//  $TERM
+//      terminate
+//
+//  CONNECT/enpoint/name
+//      connect to malamute broker on 'endpoint' registering as 'name'
+//      
+//  PRODUCER/stream
+//      publish to specified 'stream'
+//
+//  CONSUMER/stream/pattern
+//      consume messages from 'stream' with subjects matching 'pattern'
+//
+//  CONFIGURE/config_file           
+//      configure actor, where
+//      config_file - full path to mapping file
+//  ^^^ NOT IMPLEMETED YET - command logic is empty
+
+// Performs the actor commands logic
+// Destroys the message
+// Returns 1 for $TERM (means exit), 0 otherwise
+AGENT_RT_EXPORT int
+    actor_commands (
+            mlm_client_t *client,
+            zmsg_t **message_p);
 
 //  Self test of this class
 AGENT_RT_EXPORT void
