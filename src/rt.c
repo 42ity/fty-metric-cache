@@ -32,8 +32,8 @@
 
 struct _rt_t {
     zhashx_t *hash;
+    //void (*print)(rt_t*);
 };
-
 
 //  --------------------------------------------------------------------------
 //  Create a new rt
@@ -46,7 +46,7 @@ rt_new (void)
     
     self->hash = zhashx_new();
     assert(self->hash);
-    zhashx_set_destructor(self->hash, (zhashx_destructor_fn *) bios_proto_destroy);
+    zhashx_set_destructor(self->hash, (zhashx_destructor_fn *) rt_destroy);
     
     return self;
 }
@@ -58,11 +58,11 @@ rt_new (void)
 void
 rt_destroy (rt_t **self_p)
 {
-    assert (self_p);
+    if (!self_p) return;
     if (*self_p) {
         rt_t *self = *self_p;
-        //  Free class properties here
-        //  Free object itself
+        if(self->hash)
+	    //zhashx_destroy(&self->hash);
         free (self);
         *self_p = NULL;
     }
@@ -73,9 +73,9 @@ rt_destroy (rt_t **self_p)
 void
 rt_put (rt_t *self, bios_proto_t **msg_p)
 {
-    assert(is_bios_proto(bios_proto_encode(msg_p)));
     rt_t *device = NULL;
     device =(rt_t*) zhashx_lookup(self->hash, bios_proto_element_src(*msg_p));
+    
     if(!device){
         device = (rt_t *) zmalloc (sizeof (rt_t));
         assert(device);
@@ -86,7 +86,6 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
 	zhashx_insert(device->hash, bios_proto_type(*msg_p), *msg_p);
 	zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
 	
-        
     } else {
         bios_proto_t *metric = NULL;
 	metric =(bios_proto_t*) zhashx_lookup(device->hash, bios_proto_type(*msg_p));
@@ -94,6 +93,7 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
 	    zhashx_insert(device->hash, bios_proto_type(*msg_p), *msg_p);
 	else zsys_debug("element already exist\n");
     }
+    bios_proto_destroy(msg_p);
 }
 
 //  --------------------------------------------------------------------------
@@ -101,6 +101,7 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
 void
 rt_print (rt_t *self)
 {
+  printf("----------------------\n");
 }
 
 //  --------------------------------------------------------------------------
@@ -124,7 +125,7 @@ rt_test (bool verbose)
     bios_proto_set_unit (metric, "%s", "C");
     bios_proto_set_value (metric, "%s", "15");
     bios_proto_set_ttl (metric, 300);
-    
+
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
