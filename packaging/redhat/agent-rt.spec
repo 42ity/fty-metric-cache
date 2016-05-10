@@ -31,7 +31,6 @@ BuildRequires:  autoconf
 BuildRequires:  libtool
 BuildRequires:  pkg-config
 BuildRequires:  systemd-devel
-BuildRequires:  gcc-c++
 BuildRequires:  zeromq-devel
 BuildRequires:  czmq-devel
 BuildRequires:  malamute-devel

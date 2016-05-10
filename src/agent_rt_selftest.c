@@ -36,6 +36,8 @@ typedef struct {
 
 static test_item_t
 all_tests [] = {
+    { "logger", logger_test },
+    { "actor_commands", actor_commands_test },
     { "bios_agent_rt_server", bios_agent_rt_server_test },
     {0, 0}          //  Sentinel
 };
@@ -94,13 +96,15 @@ main (int argc, char **argv)
         else
         if (streq (argv [argn], "--number")
         ||  streq (argv [argn], "-n")) {
-            puts ("1");
+            puts ("3");
             return 0;
         }
         else
         if (streq (argv [argn], "--list")
         ||  streq (argv [argn], "-l")) {
             puts ("Available tests:");
+            puts ("    logger");
+            puts ("    actor_commands");
             puts ("    bios_agent_rt_server");
             return 0;
         }
