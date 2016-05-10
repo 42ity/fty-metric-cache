@@ -48,7 +48,7 @@ rt_new (void)
     self->device = NULL;
     self->metrics = zhashx_new();
     assert(self->metrics);
-    zhashx_set_destructor(self->metrics, bios_proto_destroy);
+    zhashx_set_destructor(self->metrics, (zhashx_destructor_fn *) bios_proto_destroy);
     
     return self;
 }
@@ -71,6 +71,20 @@ rt_destroy (rt_t **self_p)
 }
 
 //  --------------------------------------------------------------------------
+//  Store bios_proto_t message and destroy it
+void
+rt_put (rt_t *self, bios_proto_t **msg_p)
+{
+}
+
+//  --------------------------------------------------------------------------
+//  Print
+void
+rt_print (rt_t *self)
+{
+}
+
+//  --------------------------------------------------------------------------
 //  Self test of this class
 
 void
@@ -79,10 +93,66 @@ rt_test (bool verbose)
     printf (" * rt: ");
 
     //  @selftest
-    //  Simple create/destroy test
+    //  Simple test #1
     rt_t *self = rt_new ();
     assert (self);
+
+    bios_proto_t *metric = bios_proto_new (BIOS_PROTO_METRIC);
+    assert (metric);
+
+    bios_proto_set_type (metric, "%s", "temperature");
+    bios_proto_set_element_src (metric, "%s", "UPS.ROZ33");
+    bios_proto_set_unit (metric, "%s", "C");
+    bios_proto_set_value (metric, "%s", "15");
+    bios_proto_set_ttl (metric, 300);
+    
+    rt_put (self, &metric);
+    assert (metric == NULL); // Make sure message is deleted
+
+    metric = bios_proto_new (BIOS_PROTO_METRIC);
+    assert (metric);
+
+    bios_proto_set_type (metric, "%s", "humidity");
+    bios_proto_set_element_src (metric, "%s", "UPS.ROZ33");
+    bios_proto_set_unit (metric, "%s", "%");
+    bios_proto_set_value (metric, "%s", "40");
+    bios_proto_set_ttl (metric, 300);
+    
+    rt_put (self, &metric);
+    assert (metric == NULL); // Make sure message is deleted
+
+    metric = bios_proto_new (BIOS_PROTO_METRIC);
+    assert (metric);
+
+    bios_proto_set_type (metric, "%s", "humidity");
+    bios_proto_set_element_src (metric, "%s", "ePDU2.ROZ33");
+    bios_proto_set_unit (metric, "%s", "%");
+    bios_proto_set_value (metric, "%s", "21");
+    bios_proto_set_ttl (metric, 330);
+    
+    rt_put (self, &metric);
+    assert (metric == NULL); // Make sure message is deleted
+
+    metric = bios_proto_new (BIOS_PROTO_METRIC);
+    assert (metric);
+
+    bios_proto_set_type (metric, "%s", "load.input");
+    bios_proto_set_element_src (metric, "%s", "swtich");
+    bios_proto_set_unit (metric, "%s", "V");
+    bios_proto_set_value (metric, "%s", "134");
+    bios_proto_set_ttl (metric, 3330);
+    
+    rt_put (self, &metric);
+    assert (metric == NULL); // Make sure message is deleted
+
+    rt_print (self); // test print
+
     rt_destroy (&self);
+    assert (self == NULL);
+    rt_destroy (&self); // Make sure double delete does not crash
+    assert (self == NULL);
+    rt_destroy (NULL); // Make sure NULL delete does not crash
+
     //  @end
     printf ("OK\n");
 }
