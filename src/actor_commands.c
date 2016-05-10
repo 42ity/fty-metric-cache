@@ -1,5 +1,5 @@
 /*  =========================================================================
-    bios_agent_rt_server - Actor listening on metrics with request reply protocol
+    actor_commands - actor commands
 
     Copyright (C) 2014 - 2015 Eaton                                        
                                                                            
@@ -21,7 +21,7 @@
 
 /*
 @header
-    bios_agent_rt_server - Actor listening on metrics with request reply protocol
+    actor_commands - actor commands
 @discuss
 @end
 */
@@ -30,18 +30,18 @@
 
 //  Structure of our class
 
-struct _bios_agent_rt_server_t {
+struct _actor_commands_t {
     int filler;     //  Declare class properties here
 };
 
 
 //  --------------------------------------------------------------------------
-//  Create a new bios_agent_rt_server
+//  Create a new actor_commands
 
-bios_agent_rt_server_t *
-bios_agent_rt_server_new (void)
+actor_commands_t *
+actor_commands_new (void)
 {
-    bios_agent_rt_server_t *self = (bios_agent_rt_server_t *) zmalloc (sizeof (bios_agent_rt_server_t));
+    actor_commands_t *self = (actor_commands_t *) zmalloc (sizeof (actor_commands_t));
     assert (self);
     //  Initialize class properties here
     return self;
@@ -49,14 +49,14 @@ bios_agent_rt_server_new (void)
 
 
 //  --------------------------------------------------------------------------
-//  Destroy the bios_agent_rt_server
+//  Destroy the actor_commands
 
 void
-bios_agent_rt_server_destroy (bios_agent_rt_server_t **self_p)
+actor_commands_destroy (actor_commands_t **self_p)
 {
     assert (self_p);
     if (*self_p) {
-        bios_agent_rt_server_t *self = *self_p;
+        actor_commands_t *self = *self_p;
         //  Free class properties here
         //  Free object itself
         free (self);
@@ -68,15 +68,15 @@ bios_agent_rt_server_destroy (bios_agent_rt_server_t **self_p)
 //  Self test of this class
 
 void
-bios_agent_rt_server_test (bool verbose)
+actor_commands_test (bool verbose)
 {
-    printf (" * bios_agent_rt_server: ");
+    printf (" * actor_commands: ");
 
     //  @selftest
     //  Simple create/destroy test
-    bios_agent_rt_server_t *self = bios_agent_rt_server_new ();
+    actor_commands_t *self = actor_commands_new ();
     assert (self);
-    bios_agent_rt_server_destroy (&self);
+    actor_commands_destroy (&self);
     //  @end
     printf ("OK\n");
 }

@@ -26,7 +26,7 @@
 @end
 */
 
-#include <cerrno>
+#include <errno.h>
 
 #include "agent_rt_classes.h"
 
