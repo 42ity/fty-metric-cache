@@ -86,24 +86,28 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
     zhashx_t *device = NULL;
     if (self)
         device = (zhashx_t*) zhashx_lookup (self->hash, bios_proto_element_src(*msg_p));
-
+    
+	bios_proto_t *new_p = bios_proto_dup(*msg_p);
+	bios_proto_aux_insert(new_p, "time","%lld",(long long) zclock_mono());
+	
     if (!device) {
         device = zhashx_new();
         assert (device);
 	
     	zhashx_set_destructor (device, (zhashx_destructor_fn *) bios_proto_destroy);
 	
-    	zhashx_insert(device, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+    	zhashx_insert(device, bios_proto_type(*msg_p), new_p);
 	    zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
 	}
     else {
         bios_proto_t *metric = NULL;
     	metric =(bios_proto_t*) zhashx_lookup(device, bios_proto_type(*msg_p));
+	
     	if (!metric)
-	        zhashx_insert(device, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+	        zhashx_insert(device, bios_proto_type(*msg_p), new_p);
 	   	else {
 		  zhashx_delete(device, bios_proto_type(*msg_p));
-		  zhashx_insert(device, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+		  zhashx_insert(device, bios_proto_type(*msg_p), new_p);
 		}
             
     }
