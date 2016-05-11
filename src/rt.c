@@ -32,11 +32,17 @@
 
 struct _rt_t {
     zhashx_t *hash;
-    void (*print)(rt_t*);
 };
 
 void
-rt_print_metrics (rt_t *self);
+rt_print_metrics (zhashx_t *self);
+
+void
+rt_destroyer (zhashx_t **self_p)
+{
+  zhashx_destroy(self_p);
+}
+
 //  --------------------------------------------------------------------------
 //  Create a new rt
 
@@ -48,8 +54,8 @@ rt_new (void)
     
     self->hash = zhashx_new();
     assert(self->hash);
-    zhashx_set_destructor(self->hash, (zhashx_destructor_fn *) rt_destroy);
-    self->print = rt_print;
+    zhashx_set_destructor(self->hash, (zhashx_destructor_fn *) rt_destroyer);
+    
     return self;
 }
 
@@ -64,16 +70,8 @@ rt_destroy (rt_t **self_p)
     if (*self_p) {
         rt_t *self = *self_p;
 
-        if (self->hash) {
-	        rt_t *aux = (rt_t*) zhashx_first (self->hash);
-	        if (aux) {
-	            zhashx_destroy(&aux->hash);
-	            while((aux =(rt_t*) zhashx_next(self->hash))){
-	                zhashx_destroy(&aux->hash);
-	            }
-	        }
+        if (self->hash)
 	        zhashx_destroy(&self->hash);
-	    }
 	
         free (self);
         *self_p = NULL;
@@ -85,40 +83,40 @@ rt_destroy (rt_t **self_p)
 void
 rt_put (rt_t *self, bios_proto_t **msg_p)
 {
-    rt_t *device = NULL;
+    zhashx_t *device = NULL;
     if (self)
-        device = (rt_t*) zhashx_lookup (self->hash, bios_proto_element_src(*msg_p));
-    else
-        self = rt_new();
+        device = (zhashx_t*) zhashx_lookup (self->hash, bios_proto_element_src(*msg_p));
 
     if (!device) {
-        device = rt_new();
+        device = zhashx_new();
         assert (device);
 	
-    	zhashx_set_destructor (device->hash, (zhashx_destructor_fn *) bios_proto_destroy);
-	    device->print = rt_print_metrics;
+    	zhashx_set_destructor (device, (zhashx_destructor_fn *) bios_proto_destroy);
 	
-    	zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+    	zhashx_insert(device, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
 	    zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
 	}
     else {
         bios_proto_t *metric = NULL;
-    	metric =(bios_proto_t*) zhashx_lookup(device->hash, bios_proto_type(*msg_p));
+    	metric =(bios_proto_t*) zhashx_lookup(device, bios_proto_type(*msg_p));
     	if (!metric)
-	        zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
-	   	else
-            zsys_debug("element already exist\n");
+	        zhashx_insert(device, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+	   	else {
+		  zhashx_delete(device, bios_proto_type(*msg_p));
+		  zhashx_insert(device, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+		}
+            
     }
     bios_proto_destroy(msg_p);
 }
 
 void
 rt_purge (rt_t *self, const char *device, const char *metric){
-    rt_t *dev = NULL;
-    dev =(rt_t*) zhashx_lookup(self->hash, device);
+    zhashx_t *dev = NULL;
+    dev =(zhashx_t*) zhashx_lookup(self->hash, device);
     if(dev){
-        zhashx_delete(dev->hash, metric);
-	if(zhashx_size(dev->hash) == 0)
+        zhashx_delete(dev, metric);
+	if(zhashx_size(dev) == 0)
 	  zhashx_delete(self->hash, device);
     }
 }
@@ -128,28 +126,28 @@ void
 rt_print (rt_t *self)
 {
   if((self)&&(self->hash)){
-    rt_t *aux =(rt_t*) zhashx_first (self->hash);
-    printf ("Device: %s\n",(char *) zhashx_cursor (self->hash));
+    zhashx_t *aux =(zhashx_t*) zhashx_first (self->hash);
+    printf ("\n\n\nDevice: %s\n",(char *) zhashx_cursor (self->hash));
     
-    if(aux->print)aux->print(aux);
-    while((aux =(rt_t*) zhashx_next(self->hash))){
-      printf ("Device: %s\n",(char *) zhashx_cursor (self->hash));
-      if(aux->print)aux->print(aux);
+    if(aux)rt_print_metrics(aux);
+    while((aux =(zhashx_t*) zhashx_next(self->hash))){
+      printf ("\n\n\nDevice: %s\n",(char *) zhashx_cursor (self->hash));
+      if(aux)rt_print_metrics(aux);
     }
     
   }
 }
 
 void
-rt_print_metrics (rt_t *self)
+rt_print_metrics (zhashx_t *self)
 {
-  if(self->hash){
-    bios_proto_t *aux =(bios_proto_t*) zhashx_first (self->hash);
-    printf ("Metric: %s\n",(char *) zhashx_cursor (self->hash));
+  if(self){
+    bios_proto_t *aux =(bios_proto_t*) zhashx_first (self);
+    printf ("\n---> Metric: %s\n",(char *) zhashx_cursor (self));
     if(aux) bios_proto_print(aux);
     
-    while((aux =(bios_proto_t*) zhashx_next(self->hash))){
-      printf ("Metric: %s\n",(char *) zhashx_cursor (self->hash));
+    while((aux =(bios_proto_t*) zhashx_next(self))){
+      printf ("\n---> Metric: %s\n",(char *) zhashx_cursor (self));
       if(aux) bios_proto_print(aux);
     }
   }
@@ -243,7 +241,7 @@ rt_test (bool verbose)
     
     rt_print (self); // test print
 
-    printf ("put () on UPS.ROZ33 - humidity");
+    printf ("\n\nput () on UPS.ROZ33 - humidity\n");
     
     metric = bios_proto_new (BIOS_PROTO_METRIC);
     assert (metric);
