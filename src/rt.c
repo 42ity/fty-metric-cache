@@ -84,6 +84,7 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
 {
     rt_t *device = NULL;
     if (self) device = (rt_t*) zhashx_lookup (self->hash, bios_proto_element_src(*msg_p));
+    else self = rt_new();
     if(!device){
         device = rt_new();
         assert(device);
