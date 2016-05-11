@@ -162,6 +162,7 @@ rt_test (bool verbose)
 
     //  @selftest
     //  Simple test #1
+    
     rt_t *self = rt_new ();
     assert (self);
 
@@ -239,7 +240,7 @@ rt_test (bool verbose)
 
     //rt_purge(self,"swtich","load");
     
-    //rt_print (self); // test print
+    rt_print (self); // test print
 
     rt_destroy (&self);
     assert (self == NULL);
