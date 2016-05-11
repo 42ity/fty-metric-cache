@@ -88,9 +88,9 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
     if(!device){
         device = rt_new();
         assert(device);
-	device->hash = zhashx_new();
-	assert(device->hash);
-	zhashx_set_destructor(device->hash, (zhashx_destructor_fn *) rt_destroy);
+	//device->hash = zhashx_new();
+	//assert(device->hash);
+	//zhashx_set_destructor(device->hash, (zhashx_destructor_fn *) rt_destroy);
 	device->print = rt_print_metrics;
 	
 	//zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
