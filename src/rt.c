@@ -63,17 +63,17 @@ rt_destroy (rt_t **self_p)
     if (!self_p) return;
     if (*self_p) {
         rt_t *self = *self_p;
-        if(self->hash){
-	    rt_t * aux = NULL;
-	    aux =(rt_t*) zhashx_first (self->hash);
-	    if(aux){
-	        zhashx_destroy(&aux->hash);
-	        while((aux =(rt_t*) zhashx_next(self->hash))){
-	          zhashx_destroy(&aux->hash);
+
+        if (self->hash) {
+	        rt_t *aux = (rt_t*) zhashx_first (self->hash);
+	        if (aux) {
+	            zhashx_destroy(&aux->hash);
+	            while((aux =(rt_t*) zhashx_next(self->hash))){
+	                zhashx_destroy(&aux->hash);
+	            }
 	        }
+	        zhashx_destroy(&self->hash);
 	    }
-	    zhashx_destroy(&self->hash);
-	}
 	
         free (self);
         *self_p = NULL;
@@ -86,25 +86,28 @@ void
 rt_put (rt_t *self, bios_proto_t **msg_p)
 {
     rt_t *device = NULL;
-    if (self) device = (rt_t*) zhashx_lookup (self->hash, bios_proto_element_src(*msg_p));
-    else self = rt_new();
-    if(!device){
+    if (self)
+        device = (rt_t*) zhashx_lookup (self->hash, bios_proto_element_src(*msg_p));
+    else
+        self = rt_new();
+
+    if (!device) {
         device = rt_new();
-        assert(device);
+        assert (device);
 	
-	zhashx_set_destructor(device->hash, (zhashx_destructor_fn *) bios_proto_destroy);
-	device->print = rt_print_metrics;
+    	zhashx_set_destructor (device->hash, (zhashx_destructor_fn *) bios_proto_destroy);
+	    device->print = rt_print_metrics;
 	
-	zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
-	zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
-	
-    } else {
+    	zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+	    zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
+	}
+    else {
         bios_proto_t *metric = NULL;
-	metric =(bios_proto_t*) zhashx_lookup(device->hash, bios_proto_type(*msg_p));
-	if(!metric)
-	    zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
-	
-	else zsys_debug("element already exist\n");
+    	metric =(bios_proto_t*) zhashx_lookup(device->hash, bios_proto_type(*msg_p));
+    	if (!metric)
+	        zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+	   	else
+            zsys_debug("element already exist\n");
     }
     bios_proto_destroy(msg_p);
 }
@@ -218,18 +221,6 @@ rt_test (bool verbose)
     metric = bios_proto_new (BIOS_PROTO_METRIC);
     assert (metric);
     
-    bios_proto_set_type (metric, "%s", "load");
-    bios_proto_set_element_src (metric, "%s", "swtich");
-    bios_proto_set_unit (metric, "%s", "V");
-    bios_proto_set_value (metric, "%s", "134");
-    bios_proto_set_ttl (metric, 3330);
-    
-    rt_put (self, &metric);
-    assert (metric == NULL); // Make sure message is deleted
-    
-    metric = bios_proto_new (BIOS_PROTO_METRIC);
-    assert (metric);
-    
     bios_proto_set_type (metric, "%s", "load.output");
     bios_proto_set_element_src (metric, "%s", "swtich");
     bios_proto_set_unit (metric, "%s", "V");
@@ -250,6 +241,23 @@ rt_test (bool verbose)
     
     printf("\n\nElements after rf_purge() everything except UPS.ROZ33 - humidity\n\n");
     
+    rt_print (self); // test print
+
+    printf ("put () on UPS.ROZ33 - humidity");
+    
+    metric = bios_proto_new (BIOS_PROTO_METRIC);
+    assert (metric);
+
+    bios_proto_set_type (metric, "%s", "humidity");
+    bios_proto_set_element_src (metric, "%s", "UPS.ROZ33");
+    bios_proto_set_unit (metric, "%s", "%");
+    bios_proto_set_value (metric, "%s", "73");
+    bios_proto_set_ttl (metric, 123);
+    
+    rt_put (self, &metric);
+    assert (metric == NULL); // Make sure message is deleted
+
+
     rt_print (self); // test print
     
     rt_destroy (&self);
