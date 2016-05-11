@@ -229,7 +229,7 @@ rt_test (bool verbose)
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
-    rt_purge(self,"swtich","load");
+    //rt_purge(self,"swtich","load");
     
     rt_print (self); // test print
 
