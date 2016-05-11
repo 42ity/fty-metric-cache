@@ -162,8 +162,8 @@ rt_test (bool verbose)
 
     //  @selftest
     //  Simple test #1
-    //rt_t *self = rt_new ();
-    //assert (self);
+    rt_t *self = rt_new ();
+    assert (self);
 
     bios_proto_t *metric = bios_proto_new (BIOS_PROTO_METRIC);
     assert (metric);
@@ -174,7 +174,7 @@ rt_test (bool verbose)
     bios_proto_set_value (metric, "%s", "15");
     bios_proto_set_ttl (metric, 300);
 
-    //rt_put (self, &metric);
+    rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
     metric = bios_proto_new (BIOS_PROTO_METRIC);
@@ -186,7 +186,7 @@ rt_test (bool verbose)
     bios_proto_set_value (metric, "%s", "40");
     bios_proto_set_ttl (metric, 300);
     
-    //rt_put (self, &metric);
+    rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
     metric = bios_proto_new (BIOS_PROTO_METRIC);
@@ -198,7 +198,7 @@ rt_test (bool verbose)
     bios_proto_set_value (metric, "%s", "21");
     bios_proto_set_ttl (metric, 330);
     
-    //rt_put (self, &metric);
+    rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
     metric = bios_proto_new (BIOS_PROTO_METRIC);
@@ -210,7 +210,7 @@ rt_test (bool verbose)
     bios_proto_set_value (metric, "%s", "134");
     bios_proto_set_ttl (metric, 3330);
     
-    //rt_put (self, &metric);
+    rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
     
     metric = bios_proto_new (BIOS_PROTO_METRIC);
@@ -222,7 +222,7 @@ rt_test (bool verbose)
     bios_proto_set_value (metric, "%s", "134");
     bios_proto_set_ttl (metric, 3330);
     
-    //rt_put (self, &metric);
+    rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
     
     metric = bios_proto_new (BIOS_PROTO_METRIC);
@@ -234,18 +234,18 @@ rt_test (bool verbose)
     bios_proto_set_value (metric, "%s", "134");
     bios_proto_set_ttl (metric, 3330);
     
-    //rt_put (self, &metric);
+    rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
     //rt_purge(self,"swtich","load");
     
     //rt_print (self); // test print
 
-    //rt_destroy (&self);
-    //assert (self == NULL);
-    //rt_destroy (&self); // Make sure double delete does not crash
-    //assert (self == NULL);
-    //rt_destroy (NULL); // Make sure NULL delete does not crash
+    rt_destroy (&self);
+    assert (self == NULL);
+    rt_destroy (&self); // Make sure double delete does not crash
+    assert (self == NULL);
+    rt_destroy (NULL); // Make sure NULL delete does not crash
 
     //  @end
     printf ("OK\n");
