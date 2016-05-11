@@ -69,6 +69,7 @@ rt_destroy (rt_t **self_p)
 	    while((aux =(rt_t*) zhashx_next(self->hash))){
 	      zhashx_destroy(&aux->hash);
 	    }
+	    free(aux);
 	    zhashx_destroy(&self->hash);
 	}
         free (self);
