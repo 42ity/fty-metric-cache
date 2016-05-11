@@ -96,14 +96,14 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
 	zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
 	zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
 	
-    } else {
+    } /*else {
         bios_proto_t *metric = NULL;
 	metric =(bios_proto_t*) zhashx_lookup(device->hash, bios_proto_type(*msg_p));
 	if(!metric)
 	    zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
 	
 	else zsys_debug("element already exist\n");
-    }
+    }*/
     bios_proto_destroy(msg_p);
 }
 
