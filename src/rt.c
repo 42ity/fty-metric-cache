@@ -64,12 +64,12 @@ rt_destroy (rt_t **self_p)
     if (*self_p) {
         rt_t *self = *self_p;
         if(self->hash){
-	    rt_t *aux =(rt_t*) zhashx_first (self->hash);
+	   /* rt_t *aux =(rt_t*) zhashx_first (self->hash);
 	    zhashx_destroy(&aux->hash);
 	    while((aux =(rt_t*) zhashx_next(self->hash))){
 	      zhashx_destroy(&aux->hash);
 	    }
-	    free(aux);
+	    free(aux);*/
 	    zhashx_destroy(&self->hash);
 	}
         free (self);
