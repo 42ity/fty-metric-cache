@@ -63,8 +63,10 @@ rt_destroy (rt_t **self_p)
     if (!self_p) return;
     if (*self_p) {
         rt_t *self = *self_p;
-        if(self->hash)
+        if(self->hash){
 	    zhashx_destroy(&self->hash);
+	    free(self->hash);
+	}
         free (self);
         *self_p = NULL;
     }
@@ -229,7 +231,7 @@ rt_test (bool verbose)
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
-    //rt_purge(self,"swtich","load");
+    rt_purge(self,"swtich","load");
     
     rt_print (self); // test print
 
