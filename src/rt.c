@@ -63,10 +63,8 @@ rt_destroy (rt_t **self_p)
     if (!self_p) return;
     if (*self_p) {
         rt_t *self = *self_p;
-        if(self->hash){
+        if(self->hash)
 	    zhashx_destroy(&self->hash);
-	    free(self->hash);
-	}
         free (self);
         *self_p = NULL;
     }
@@ -101,18 +99,6 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
     bios_proto_destroy(msg_p);
 }
 
-void
-rt_purge (rt_t *self, const char *device, const char *metric){
-    rt_t *dev = NULL;
-    dev =(rt_t*) zhashx_lookup(self->hash, device);
-    if(dev){
-        zhashx_delete(dev->hash, metric);
-	if(zhashx_size(dev->hash) == 0){
-	  rt_destroy(&dev);
-	  zhashx_delete(self->hash, device);
-	}
-    }
-}
 //  --------------------------------------------------------------------------
 //  Print
 void
@@ -231,8 +217,6 @@ rt_test (bool verbose)
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
-    rt_purge(self,"swtich","load");
-    
     rt_print (self); // test print
 
     rt_destroy (&self);

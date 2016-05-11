@@ -46,8 +46,8 @@ AGENT_RT_EXPORT zhashx_t *
     rt_get_device (rt_t *self, const char *device);
 
 // Purge
-AGENT_RT_EXPORT void
-    rt_purge (rt_t *self, const char *device, const char *metric);
+//AGENT_RT_EXPORT void
+//    rt_purge (rt_t *self, const char *device, const char *metric);
 
 //  Print
 AGENT_RT_EXPORT void
