@@ -43,7 +43,7 @@ rt_print_metrics (rt_t *self);
 rt_t *
 rt_new (void)
 {
-    rt_t *self = (rt_t *) malloc (sizeof (rt_t));
+    rt_t *self = (rt_t *) zmalloc (sizeof (rt_t));
     assert (self);
     
     self->hash = zhashx_new();
