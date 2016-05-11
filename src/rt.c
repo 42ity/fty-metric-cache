@@ -113,16 +113,42 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
     }
     bios_proto_destroy(msg_p);
 }
-
 void
-rt_purge (rt_t *self, const char *device, const char *metric){
-    zhashx_t *dev = NULL;
-    dev =(zhashx_t*) zhashx_lookup(self->hash, device);
-    if(dev){
-        zhashx_delete(dev, metric);
-	if(zhashx_size(dev) == 0)
-	  zhashx_delete(self->hash, device);
+rt_purge_dev_hash (zhashx_t *self){
+  if(self){
+    bios_proto_t *metric =(bios_proto_t*) zhashx_first (self);
+    if(metric) {
+      printf("*-*-> Checking time: %s in with end time %lld\n", bios_proto_type(metric),(long long) (bios_proto_ttl(metric) + (*(int32_t*) zhash_lookup(bios_proto_aux(metric), "time"))));
+      if((int64_t) (bios_proto_ttl(metric) + (*(int32_t*) zhash_lookup(bios_proto_aux(metric), "time"))) < zclock_mono())
+	zhashx_delete(self, zhashx_cursor(self));
     }
+    while((metric =(bios_proto_t*) zhashx_next(self))){ 
+      if(metric) {
+	printf("*-*-> Checking time: %s in with end time %lld\n", bios_proto_type(metric),(long long) (bios_proto_ttl(metric) + (*(int32_t*) zhash_lookup(bios_proto_aux(metric), "time"))));
+	if((int64_t) (bios_proto_ttl(metric) + (*(int32_t*) zhash_lookup(bios_proto_aux(metric), "time"))) < zclock_mono())
+	  zhashx_delete(self, zhashx_cursor(self));
+      }
+    }
+  }
+}
+void
+rt_purge (rt_t *self){
+    if((self)&&(self->hash)){
+    zhashx_t *device =(zhashx_t*) zhashx_first (self->hash);
+    if(device){
+      rt_purge_dev_hash(device);
+      if(zhashx_size(device) == 0)
+            zhashx_delete(self->hash, zhashx_cursor(self->hash));
+    }
+    while((device =(zhashx_t*) zhashx_next(self->hash))){
+      if(device){
+	rt_purge_dev_hash(device);
+        if(zhashx_size(device) == 0)
+            zhashx_delete(self->hash, zhashx_cursor(self->hash));
+      }
+    }
+    
+  }
 }
 //  --------------------------------------------------------------------------
 //  Print
@@ -148,11 +174,16 @@ rt_print_metrics (zhashx_t *self)
   if(self){
     bios_proto_t *aux =(bios_proto_t*) zhashx_first (self);
     printf ("\n---> Metric: %s\n",(char *) zhashx_cursor (self));
-    if(aux) bios_proto_print(aux);
-    
+    if(aux) {
+      bios_proto_print(aux);
+      printf("***-> Life time: %lld\n",(long long) bios_proto_ttl(aux));
+    }
     while((aux =(bios_proto_t*) zhashx_next(self))){
       printf ("\n---> Metric: %s\n",(char *) zhashx_cursor (self));
-      if(aux) bios_proto_print(aux);
+      if(aux) {
+      bios_proto_print(aux);
+      printf("***-> Life time: %lld\n",(long long) bios_proto_ttl(aux));
+    }
     }
   }
 }
@@ -232,20 +263,18 @@ rt_test (bool verbose)
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
     
-    printf("\n----------> Elements:\n\n");
+    printf("\n----------> Elements in system_time: %lld\n\n",(long long) zclock_mono());
     rt_print (self); // test print
     
-    rt_purge(self,"swtich","load");
-    rt_purge(self,"swtich","load.output");
-    rt_purge(self,"swtich","load.input");
-    rt_purge(self,"UPS.ROZ33","temperature");
-    rt_purge(self,"ePDU2.ROZ33","humidity");
+    sleep(3);
     
-    printf("\n\nElements after rf_purge() everything except UPS.ROZ33 - humidity\n\n");
+    printf("\n\nElements after rf_purge() in sys_time: %lld\n\n",(long long) zclock_mono());
+    
+    rt_purge (self);
     
     rt_print (self); // test print
 
-    printf ("\n\nput () on UPS.ROZ33 - humidity\n");
+    /*printf ("\n\nput () on UPS.ROZ33 - humidity\n");
     
     metric = bios_proto_new (BIOS_PROTO_METRIC);
     assert (metric);
@@ -258,7 +287,7 @@ rt_test (bool verbose)
     
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
-
+*/
 
     rt_print (self); // test print
     
