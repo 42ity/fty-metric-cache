@@ -49,7 +49,7 @@ rt_new (void)
     self->hash = zhashx_new();
     assert(self->hash);
     zhashx_set_destructor(self->hash, (zhashx_destructor_fn *) rt_destroy);
-    self->print = NULL;
+    self->print = rt_print;
     return self;
 }
 
@@ -64,14 +64,17 @@ rt_destroy (rt_t **self_p)
     if (*self_p) {
         rt_t *self = *self_p;
         if(self->hash){
-	    rt_t *aux =(rt_t*) zhashx_first (self->hash);
-	    zhashx_destroy(&aux->hash);
-	    while((aux =(rt_t*) zhashx_next(self->hash))){
-	      zhashx_destroy(&aux->hash);
+	    rt_t * aux = NULL;
+	    aux =(rt_t*) zhashx_first (self->hash);
+	    if(aux){
+	        zhashx_destroy(&aux->hash);
+	        while((aux =(rt_t*) zhashx_next(self->hash))){
+	          zhashx_destroy(&aux->hash);
+	        }
 	    }
-	    free(aux);
 	    zhashx_destroy(&self->hash);
 	}
+	
         free (self);
         *self_p = NULL;
     }
@@ -88,22 +91,21 @@ rt_put (rt_t *self, bios_proto_t **msg_p)
     if(!device){
         device = rt_new();
         assert(device);
-	//device->hash = zhashx_new();
-	//assert(device->hash);
-	//zhashx_set_destructor(device->hash, (zhashx_destructor_fn *) rt_destroy);
+	
+	zhashx_set_destructor(device->hash, (zhashx_destructor_fn *) bios_proto_destroy);
 	device->print = rt_print_metrics;
 	
-	//zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
+	zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
 	zhashx_insert(self->hash, bios_proto_element_src(*msg_p), device);
 	
-    } /*else {
+    } else {
         bios_proto_t *metric = NULL;
 	metric =(bios_proto_t*) zhashx_lookup(device->hash, bios_proto_type(*msg_p));
 	if(!metric)
 	    zhashx_insert(device->hash, bios_proto_type(*msg_p), bios_proto_dup(*msg_p));
 	
 	else zsys_debug("element already exist\n");
-    }*/
+    }
     bios_proto_destroy(msg_p);
 }
 
@@ -113,10 +115,8 @@ rt_purge (rt_t *self, const char *device, const char *metric){
     dev =(rt_t*) zhashx_lookup(self->hash, device);
     if(dev){
         zhashx_delete(dev->hash, metric);
-	if(zhashx_size(dev->hash) == 0){
-	  rt_destroy(&dev);
+	if(zhashx_size(dev->hash) == 0)
 	  zhashx_delete(self->hash, device);
-	}
     }
 }
 //  --------------------------------------------------------------------------
@@ -124,7 +124,7 @@ rt_purge (rt_t *self, const char *device, const char *metric){
 void
 rt_print (rt_t *self)
 {
-  if(self->hash){
+  if((self)&&(self->hash)){
     rt_t *aux =(rt_t*) zhashx_first (self->hash);
     printf ("Device: %s\n",(char *) zhashx_cursor (self->hash));
     
@@ -176,6 +176,7 @@ rt_test (bool verbose)
     bios_proto_set_ttl (metric, 300);
 
     rt_put (self, &metric);
+    
     assert (metric == NULL); // Make sure message is deleted
 
     metric = bios_proto_new (BIOS_PROTO_METRIC);
@@ -237,11 +238,20 @@ rt_test (bool verbose)
     
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
-
-    //rt_purge(self,"swtich","load");
+    
+    printf("\n----------> Elements:\n\n");
+    rt_print (self); // test print
+    
+    rt_purge(self,"swtich","load");
+    rt_purge(self,"swtich","load.output");
+    rt_purge(self,"swtich","load.input");
+    rt_purge(self,"UPS.ROZ33","temperature");
+    rt_purge(self,"ePDU2.ROZ33","humidity");
+    
+    printf("\n\nElements after rf_purge() everything except UPS.ROZ33 - humidity\n\n");
     
     rt_print (self); // test print
-
+    
     rt_destroy (&self);
     assert (self == NULL);
     rt_destroy (&self); // Make sure double delete does not crash
