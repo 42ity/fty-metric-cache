@@ -118,17 +118,11 @@ rt_purge_dev_hash (zhashx_t *self){
   if(self){
     bios_proto_t *metric =(bios_proto_t*) zhashx_first (self);
     int64_t timestamp;
-    if(metric) {
-      sscanf((const char*)zhash_lookup(bios_proto_aux(metric), "time"), "%" SCNd64 "", &timestamp);
-      if(((int64_t)bios_proto_ttl(metric) + timestamp) < zclock_mono())
-	zhashx_delete(self, zhashx_cursor(self));
-    }
-    while((metric =(bios_proto_t*) zhashx_next(self))){ 
-      if(metric) {
+    while(metric){ 
 	sscanf((const char*)zhash_lookup(bios_proto_aux(metric), "time"), "%" SCNd64 "", &timestamp);
 	if(((int64_t)bios_proto_ttl(metric) + timestamp) < zclock_mono())
 	  zhashx_delete(self, zhashx_cursor(self));
-      }
+	metric = (bios_proto_t*) zhashx_next(self);
     }
   }
 }
@@ -136,19 +130,12 @@ void
 rt_purge (rt_t *self){
     if((self)&&(self->hash)){
     zhashx_t *device =(zhashx_t*) zhashx_first (self->hash);
-    if(device){
-      printf("Checking device %s for purge\n",(char*) zhashx_cursor(self->hash));
-      rt_purge_dev_hash(device);
-      if(zhashx_size(device) == 0)
-            zhashx_delete(self->hash, zhashx_cursor(self->hash));
-    }
-    while((device =(zhashx_t*) zhashx_next(self->hash))){
-      if(device){
+    while(device){
 	printf("Checking device %s for purge\n",(char*) zhashx_cursor(self->hash));
 	rt_purge_dev_hash(device);
         if(zhashx_size(device) == 0)
             zhashx_delete(self->hash, zhashx_cursor(self->hash));
-      }
+	device = (zhashx_t*) zhashx_next(self->hash);
     }
     
   }
@@ -160,14 +147,11 @@ rt_print (rt_t *self)
 {
   if((self)&&(self->hash)){
     zhashx_t *aux =(zhashx_t*) zhashx_first (self->hash);
-    printf ("\n\n\nDevice: %s\n",(char *) zhashx_cursor (self->hash));
-    
-    if(aux)rt_print_metrics(aux);
-    while((aux =(zhashx_t*) zhashx_next(self->hash))){
+    while(aux){
       printf ("\n\n\nDevice: %s\n",(char *) zhashx_cursor (self->hash));
       if(aux)rt_print_metrics(aux);
+      aux =(zhashx_t*) zhashx_next(self->hash);
     }
-    
   }
 }
 
@@ -176,15 +160,11 @@ rt_print_metrics (zhashx_t *self)
 {
   if(self){
     bios_proto_t *aux =(bios_proto_t*) zhashx_first (self);
-    printf ("\n---> Metric: %s\n",(char *) zhashx_cursor (self));
-    if(aux) {
-      bios_proto_print(aux);
-    }
-    while((aux =(bios_proto_t*) zhashx_next(self))){
+    while(aux){
       printf ("\n---> Metric: %s\n",(char *) zhashx_cursor (self));
-      if(aux) {
-      bios_proto_print(aux);
-    }
+      if(aux)
+	bios_proto_print(aux);
+    aux =(bios_proto_t*) zhashx_next(self);
     }
   }
 }
