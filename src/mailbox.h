@@ -1,5 +1,5 @@
 /*  =========================================================================
-    rt - agent rt structure
+    mailbox - mailbox deliver
 
     Copyright (C) 2014 - 2015 Eaton                                        
                                                                            
@@ -19,49 +19,37 @@
     =========================================================================
 */
 
-#ifndef RT_H_INCLUDED
-#define RT_H_INCLUDED
+#ifndef MAILBOX_H_INCLUDED
+#define MAILBOX_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct _rt_t rt_t;
+typedef struct _mailbox_t mailbox_t;
 
 //  @interface
-//  Create a new rt
-AGENT_RT_EXPORT rt_t *
-    rt_new (void);
 
-//  Store bios_proto_t message transfering ownership
+/*
+ * Work in Progress
+ *
+ * sender sends one of the following multipart string messages
+ *  1) GET/element
+ *
+ * agent-rt replies with the following multipart frame message
+ *  2) OK/frame  
+ *      where 'frame' == zhashx_pack ()
+ *
+ * TODO: subject, GET/element/type, 
+ */
+
+//  Perform mailbox deliver protocol
 AGENT_RT_EXPORT void
-    rt_put (rt_t *self, bios_proto_t **message);
-
-//  Get specific measurement for given element or NULL when no data
-//  Does not transfer ownership
-AGENT_RT_EXPORT bios_proto_t *
-    rt_get (rt_t *self, const char *element, const char *measurement);
-
-//  Get all measurements for given element or NULL when no data
-//  Does not transfer ownership
-AGENT_RT_EXPORT zhashx_t *
-    rt_get_element (rt_t *self, const char *element);
-
-//  Purge expired data
-AGENT_RT_EXPORT void
-    rt_purge (rt_t *self);
-
-//  Print
-AGENT_RT_EXPORT void
-    rt_print (rt_t *self);
-
-//  Destroy the rt
-AGENT_RT_EXPORT void
-    rt_destroy (rt_t **self_p);
+    mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data);
 
 //  Self test of this class
 AGENT_RT_EXPORT void
-    rt_test (bool verbose);
+    mailbox_test (bool verbose);
 
 //  @end
 
