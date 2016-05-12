@@ -242,22 +242,6 @@ actor_commands_test (bool verbose)
     STDERR_NON_EMPTY
 
     // --------------------------------------------------------------
-/* TODO: uncomment test when CONFIGURE functionality implemented
-
-    fp = freopen ("stderr.txt", "w+", stderr);
-    // CONFIGURE
-    message = zmsg_new ();
-    assert (message);
-    zmsg_addstr (message, "CONFIGURE");
-    zmsg_addstr (message, "mapping.conf");
-    rv = actor_commands (client, &message);
-    assert (rv == 0);
-    assert (message == NULL);
-
-    STDERR_EMPTY
-
-*/
-    // --------------------------------------------------------------
     fp = freopen ("stderr.txt", "w+", stderr);
     // CONNECT - expected fail
     message = zmsg_new ();
@@ -296,6 +280,47 @@ actor_commands_test (bool verbose)
     rv = actor_commands (client, &message);
     assert (rv == 0);
     assert (message == NULL);  
+
+    STDERR_NON_EMPTY
+
+    // --------------------------------------------------------------
+    fp = freopen ("stderr.txt", "w+", stderr);    
+    // CONSUMER - expected fail
+    message = zmsg_new ();
+    assert (message);
+    zmsg_addstr (message, "CONSUMER");
+    zmsg_addstr (message, "some-stream");   
+    // missing pattern here
+    rv = actor_commands (client, &message);
+    assert (rv == 0);
+    assert (message == NULL);
+
+    STDERR_NON_EMPTY
+
+    // --------------------------------------------------------------
+    fp = freopen ("stderr.txt", "w+", stderr);    
+    // CONSUMER - expected fail
+    message = zmsg_new ();
+    assert (message);
+    zmsg_addstr (message, "CONSUMER");
+    // missing stream here
+    // missing pattern here
+    rv = actor_commands (client, &message);
+    assert (rv == 0);
+    assert (message == NULL);
+
+    STDERR_NON_EMPTY
+
+    // --------------------------------------------------------------
+    fp = freopen ("stderr.txt", "w+", stderr);    
+    // PRODUCER - expected fail
+    message = zmsg_new ();
+    assert (message);
+    zmsg_addstr (message, "PRODUCER");
+    // missing stream here
+    rv = actor_commands (client, &message);
+    assert (rv == 0);
+    assert (message == NULL);
 
     STDERR_NON_EMPTY
 
@@ -345,48 +370,16 @@ actor_commands_test (bool verbose)
     assert (rv == 0);
     assert (message == NULL);
 
+    // CONFIGURE
+    message = zmsg_new ();
+    assert (message);
+    zmsg_addstr (message, "CONFIGURE");
+    zmsg_addstr (message, "mapping.conf");
+    rv = actor_commands (client, &message);
+    assert (rv == 0);
+    assert (message == NULL);
+
     STDERR_EMPTY
-
-    // --------------------------------------------------------------
-    fp = freopen ("stderr.txt", "w+", stderr);    
-    // CONSUMER - expected fail
-    message = zmsg_new ();
-    assert (message);
-    zmsg_addstr (message, "CONSUMER");
-    zmsg_addstr (message, "some-stream");   
-    // missing pattern here
-    rv = actor_commands (client, &message);
-    assert (rv == 0);
-    assert (message == NULL);
-
-    STDERR_NON_EMPTY
-
-    // --------------------------------------------------------------
-    fp = freopen ("stderr.txt", "w+", stderr);    
-    // CONSUMER - expected fail
-    message = zmsg_new ();
-    assert (message);
-    zmsg_addstr (message, "CONSUMER");
-    // missing stream here
-    // missing pattern here
-    rv = actor_commands (client, &message);
-    assert (rv == 0);
-    assert (message == NULL);
-
-    STDERR_NON_EMPTY
-
-    // --------------------------------------------------------------
-    fp = freopen ("stderr.txt", "w+", stderr);    
-    // PRODUCER - expected fail
-    message = zmsg_new ();
-    assert (message);
-    zmsg_addstr (message, "PRODUCER");
-    // missing stream here
-    rv = actor_commands (client, &message);
-    assert (rv == 0);
-    assert (message == NULL);
-
-    STDERR_NON_EMPTY
 
     zmsg_destroy (&message);
     mlm_client_destroy (&client);
