@@ -119,7 +119,8 @@ rt_purge_dev_hash (zhashx_t *self){
     bios_proto_t *metric =(bios_proto_t*) zhashx_first (self);
     int64_t timestamp;
     while(metric){ 
-	sscanf((const char*)zhash_lookup(bios_proto_aux(metric), "time"), "%" SCNd64 "", &timestamp);
+	//sscanf((const char*)zhash_lookup(bios_proto_aux(metric), "time"), "%" SCNd64 "", &timestamp);
+	timestamp = bios_proto_aux_number(metric, "time", 0);
 	if(((int64_t)bios_proto_ttl(metric) + timestamp) < zclock_mono())
 	  zhashx_delete(self, zhashx_cursor(self));
 	metric = (bios_proto_t*) zhashx_next(self);

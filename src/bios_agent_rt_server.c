@@ -33,9 +33,9 @@
 
 
 static void
-s_handle_poll ()
+s_handle_poll (rt_t *data)
 {
-
+  rt_purge(data);
 }
 
 static void
@@ -65,9 +65,11 @@ s_handle_stream (mlm_client_t *client, zmsg_t **message_p, rt_t *data)
 {
     assert (client);
     assert (message_p && *message_p);
-
-
-    zmsg_destroy (message_p);
+    bios_proto_t **aux = (bios_proto_t**)malloc(sizeof(bios_proto_t*));
+    *aux = bios_proto_decode(message_p);
+    rt_put(data, aux);
+    free(aux);
+// store the mesage in data, overwriting any old data _put ()
 }
 
 void
@@ -103,7 +105,7 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
                 break;
             }
             if (zpoller_expired (poller)) {
-                s_handle_poll ();
+                s_handle_poll (data);
             }
             timestamp = (uint64_t) zclock_mono ();
             continue;
@@ -111,7 +113,7 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
 
         uint64_t now = (uint64_t) zclock_mono ();
         if (now - timestamp >= timeout) {
-            s_handle_poll ();
+            s_handle_poll (data);
             timestamp = (uint64_t) zclock_mono ();
         }
 
