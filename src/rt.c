@@ -131,7 +131,6 @@ rt_purge (rt_t *self){
     if((self)&&(self->hash)){
     zhashx_t *device =(zhashx_t*) zhashx_first (self->hash);
     while(device){
-	printf("Checking device %s for purge\n",(char*) zhashx_cursor(self->hash));
 	rt_purge_dev_hash(device);
         if(zhashx_size(device) == 0)
             zhashx_delete(self->hash, zhashx_cursor(self->hash));
@@ -255,7 +254,7 @@ rt_test (bool verbose)
     
     rt_print (self); // test print
 
-    /*printf ("\n\nput () on UPS.ROZ33 - humidity\n");
+    printf ("\n\n---------------> put () on UPS.ROZ33 - humidity\n");
     
     metric = bios_proto_new (BIOS_PROTO_METRIC);
     assert (metric);
@@ -269,7 +268,14 @@ rt_test (bool verbose)
     rt_put (self, &metric);
     assert (metric == NULL); // Make sure message is deleted
 
-    rt_print (self);*/ // test print
+    rt_print (self); // test print
+    
+    sleep(3);
+    rt_purge(self);
+     
+    printf("\n\n--------------> Purge an other time after 3 seconds \n");
+     
+    rt_print(self);
     
     rt_destroy (&self);
     assert (self == NULL);
