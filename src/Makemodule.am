@@ -21,6 +21,7 @@ src_libagent_rt_la_SOURCES = \
     src/logger.c \
     src/actor_commands.c \
     src/rt.c \
+    src/mailbox.c \
     src/bios_agent_rt_server.c \
     src/platform.h
 

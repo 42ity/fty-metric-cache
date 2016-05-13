@@ -31,6 +31,7 @@ EXTRA_DIST = \
     src/logger.h \
     src/actor_commands.h \
     src/rt.h \
+    src/mailbox.h \
     src/agent_rt_classes.h
 
 include $(srcdir)/src/Makemodule.am
