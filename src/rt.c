@@ -270,8 +270,15 @@ rt_test (bool verbose)
     r = rt_get_element (self, "ups");
     assert (r);
     assert (zhashx_size (r) == 2);
-    assert (zhashx_lookup (r, "temp"));
-    assert (zhashx_lookup (r, "humidity"));
+
+    proto = (bios_proto_t *) zhashx_lookup (r, "temp");
+    assert (proto);
+    test_assert_proto (proto, "temp", "ups", "15", "C", 10);
+
+    proto = (bios_proto_t *) zhashx_lookup (r, "humidity");
+    assert (proto);
+    test_assert_proto (proto, "humidity", "ups", "40", "%", 20);
+
     assert (zhashx_lookup (r, "load.input") == NULL);
 
     // purge imediatelly, nothing should be removed
