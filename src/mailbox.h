@@ -41,17 +41,18 @@ typedef struct _mailbox_t mailbox_t;
 
     where
         * '/' indicates a multipart _string_ message
-        * uuid - unique universal identifier
-        * element - name of asset element
+        * 'uuid' is unique universal identifier
+        * 'element' is name of asset element
         * subject of the message MUST be "latest-rt-data"
         
  The RT-PROVIDER peer MUST respond with one of the following messages:
     
-    2) uuid/OK/data
+    2) uuid/OK/element/data
 
     where
         * '/' indicates a multipart _frame_ message
         * 'uuid' is string, MUST be repeated from request message 1)
+        * 'element' is string, MUST be repeated from request message 1)
         * 'data' is frame that contains zhashx_t of latest real time measurements
             of requested element. Decoded zhashx_t MAY be empty in case given element
             has no latest measurements or does not exist.
