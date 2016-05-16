@@ -361,6 +361,8 @@ rt_test (bool verbose)
     proto = rt_get (self, "switch", "amperes");
     assert (proto == NULL);
 
+    // purge on empty
+    rt_purge (self);
 
     rt_destroy (&self);
 
