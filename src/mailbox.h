@@ -30,18 +30,38 @@ typedef struct _mailbox_t mailbox_t;
 
 //  @interface
 
-/*
- * Work in Progress
- *
- * sender sends one of the following multipart string messages
- *  1) GET/element
- *
- * agent-rt replies with the following multipart frame message
- *  2) OK/frame  
- *      where 'frame' == zhashx_pack ()
- *
- * TODO: subject, GET/element/type, 
- */
+
+/* RFC-todo
+
+ Connects UI peer to RT-PROVIDER peer.
+
+ The UI peer sends the following message using MAILBOX SEND to RT-PROVIDER peer:
+
+    1) uuid/GET/element - Request latest real time measurements of element
+
+    where
+        * '/' indicates a multipart _string_ message
+        * 'uuid' is unique universal identifier
+        * 'element' is name of asset element
+        * subject of the message MUST be "latest-rt-data"
+        
+ The RT-PROVIDER peer MUST respond with one of the following messages:
+    
+    2) uuid/OK/element/data
+
+    where
+        * '/' indicates a multipart _frame_ message
+        * 'uuid' is string, MUST be repeated from request message 1)
+        * 'element' is string, MUST be repeated from request message 1)
+        * 'data' is frame that contains zhashx_t of latest real time measurements
+            of requested element. Decoded zhashx_t MAY be empty in case given element
+            has no latest measurements or does not exist.
+        * subject of the message MUST be repeated from request message 1)
+
+ In case the UI peer sends a message to RT-PROVIDER not conforming to 1), i.e. the message
+ has bad format or the subject is incorrect, RT-PROVIDER peer SHALL NOT respond back.
+ 
+*/
 
 //  Perform mailbox deliver protocol
 AGENT_RT_EXPORT void
