@@ -28,28 +28,7 @@
 
 #include "agent_rt_classes.h"
 
-// Send error mailbox message
-static void
-s_send_error_response (mlm_client_t *client, const char *subject, const char *reason) {
-    assert (client);
-    assert (subject);
-    assert (reason);
-
-    zmsg_t *reply  = zmsg_new ();
-    assert (reply);
-
-    zmsg_addstr (reply, "ERROR");
-    zmsg_addstr (reply, reason);
-
-    int rv = mlm_client_sendto (client, mlm_client_sender (client), subject, NULL, 5000, &reply);
-    if (rv != 0) {
-        zmsg_destroy (&reply);
-        zsys_error (
-                "mlm_client_sendto (sender = '%s', subject = '%s', timeout = '5000') failed.",
-                mlm_client_sender (client), subject);
-    }
-}
-
+#define RFC_RT_DATA_SUBJECT "latest-rt-data"
 
 //  --------------------------------------------------------------------------
 //  Perform mailbox deliver protocol
@@ -60,31 +39,78 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
     assert (msg_p);
     assert (data);
 
-
     if (!*msg_p)
         return;
     zmsg_t *msg = *msg_p;
- 
-    // TODO: check mlm_client_subject ()
-   
+    
+    // check subject
+    if (!streq (mlm_client_subject (client), RFC_RT_DATA_SUBJECT)) {
+        zmsg_destroy (msg_p);
+        log_warning ("Message with bad subject received. Sender: '%s', Subject: '%s'.",
+                mlm_client_sender (client), mlm_client_subject (client));
+        return;
+    }
+    // check uuid 
+    char *uuid = zmsg_popstr (msg);
+    if (!uuid) {
+        zmsg_destroy (msg_p);
+        log_warning (
+            "Bad message. Expected multipart string message `uuid/GET/element`"
+            " - 'uuid' field missing. Sender: '%s', Subject: '%s'.",
+                mlm_client_sender (client), mlm_client_subject (client));
+        return;
+    }
+    // check 'GET' command
     char *command = zmsg_popstr (msg);
     if (!command || !streq (command, "GET")) {
-        s_send_error_response (client, "TODO", "BAD_MESSAGE"); // TODO
         zmsg_destroy (msg_p);
+        zstr_free (&command);        
+        zstr_free (&uuid);
+        log_warning (
+            "Bad message. Expected multipart string message `uuid/GET/element`"
+            " - 'GET' missing or different string. Sender: '%s', Subject: '%s'.",
+                mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
     zstr_free (&command);
-
+    // check element
     char *element = zmsg_popstr (msg);
-    if (!command || !streq (command, "GET")) {
-        // TODO s_send_error_response () BAD_MESSAGE
+    if (!element) {
         zmsg_destroy (msg_p);
+        zstr_free (&uuid);
+        log_warning (
+            "Bad message. Expected multipart string message `uuid/GET/element`"
+            " - 'GET' missing or different string. Sender: '%s', Subject: '%s'.",
+                mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
     zmsg_destroy (msg_p);
 
-    // Too tire to continue  zhashx_t *r = rt_get_element ();
+    zmsg_t *reply = zmsg_new ();
+    zmsg_addstr (reply, uuid);
+    zmsg_addstr (reply, "OK");
+    zmsg_addstr (reply, element);
+
+    zhashx_t *hash = rt_get_element (data, element);
+    zframe_t *frame = NULL;
+    if (!hash) {
+        hash = zhashx_new ();
+        frame = zhashx_pack (hash);
+        zhashx_destroy (&hash);
+    }
+    else {
+        frame = zhashx_pack (hash);
+    }
+    zmsg_append (reply, &frame);
+
+    zstr_free (&uuid);
     zstr_free (&element);
+
+    int rv = mlm_client_sendto (client, mlm_client_sender (client), RFC_ALERTS_LIST_SUBJECT, NULL, 5000, &reply);
+    if (rv != 0) {
+        log_error ("mlm_client_sendto (sender = '%s', subject = '%s', timeout = '5000') failed.",
+                mlm_client_sender (client), RFC_RT_DATA_SUBJECT);
+    }
 }
 
 //  --------------------------------------------------------------------------
@@ -96,7 +122,6 @@ mailbox_test (bool verbose)
     printf (" * mailbox: ");
 
     //  @selftest
-    //  Simple create/destroy test
     //  @end
-    printf ("OK\n");
+    printf ("Empty test - OK\n");
 }
