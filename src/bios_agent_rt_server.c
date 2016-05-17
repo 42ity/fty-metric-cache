@@ -28,14 +28,12 @@
 
 #include "agent_rt_classes.h"
 
-#define POLL_INTERVAL 10000
-
-
+#define POLL_INTERVAL 30000
 
 static void
 s_handle_poll (rt_t *data)
 {
-  rt_purge (data);
+    rt_purge (data);
 }
 
 static void
@@ -52,11 +50,10 @@ s_handle_service (mlm_client_t *client, zmsg_t **message_p)
 static void
 s_handle_mailbox (mlm_client_t *client, zmsg_t **message_p, rt_t *data)
 {
-
     assert (client);
     assert (message_p && *message_p);
 
-    log_error ("Protocols are not defined.");
+    mailbox_perform (client, message_p, data);
 
     zmsg_destroy (message_p);
 }
@@ -155,7 +152,6 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
         else {
             log_error ("Unrecognized mlm_client_command () = '%s'", command ? command : "(null)");
         }
-
         zmsg_destroy (&message);
     } // while (!zsys_interrupted)
 
@@ -167,21 +163,38 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
 //  --------------------------------------------------------------------------
 //  Self test of this class
 
+static void
+test_assert_proto (
+        bios_proto_t *p,
+        const char *type,
+        const char *element,
+        const char *value,
+        const char *unit,
+        uint32_t ttl)
+{
+    assert (p);
+    assert (streq (bios_proto_type (p), type));
+    assert (streq (bios_proto_element_src (p), element));
+    assert (streq (bios_proto_unit (p), unit));
+    assert (streq (bios_proto_value (p), value));
+    assert (bios_proto_ttl (p) == ttl);
+}
+
 void
 bios_agent_rt_server_test (bool verbose)
 {
-    printf (" * bios_agent_rt_server: ");
-    //  @selftest
-   /*
     static const char* endpoint = "inproc://bios-agent-rt-server-test";
 
+    printf (" * bios_agent_rt_server: ");
+    //  @selftest
+    
     zactor_t *server = zactor_new (mlm_server, (void*) "Malamute");
     zstr_sendx (server, "BIND", endpoint, NULL);
     if (verbose)
         zstr_send (server, "VERBOSE");
 
     mlm_client_t *producer = mlm_client_new ();
-    mlm_client_connect (producer, endpoint, 1000, "producer");
+    mlm_client_connect (producer, endpoint, 1000, "PRODUCER");
     mlm_client_set_producer (producer, "METRICS");
 
     mlm_client_t *ui = mlm_client_new ();
@@ -190,70 +203,249 @@ bios_agent_rt_server_test (bool verbose)
     zactor_t *rt = zactor_new (bios_agent_rt_server, (void*) NULL);
     zstr_sendx (rt, "CONNECT", endpoint, "agent-rt", NULL);
     zstr_sendx (rt, "CONSUMER", "METRICS", ".*", NULL);
-    zclock_sleep (500);   //THIS IS A HACK TO SETTLE DOWN THINGS
+    zclock_sleep (100);
 
-    zmsg_t *msg = bios_proto_encode_metric (
-        NULL,
-        "temperature",
-        "ups",
-        "30",
-        "C",
-        60);
-    assert (msg);
+    zmsg_t *msg = bios_proto_encode_metric (NULL, "temperature", "ups", "30", "C", 5);
     int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
+    zclock_sleep (100);
 
-
-    msg = bios_proto_encode_metric (
-        NULL,
-        "humidity",
-        "ups",
-        "45",
-        "%",
-        60);
-    assert (msg);
+    msg = bios_proto_encode_metric (NULL, "humidity", "ups", "45", "%", 5);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
+    zclock_sleep (100);
 
-    msg = bios_proto_encode_metric (
-        NULL,
-        "temperature",
-        "epdu",
-        "25",
-        "C",
-        60);
-    assert (msg);
+    msg = bios_proto_encode_metric (NULL, "temperature", "epdu", "25", "C", 60);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
+    zclock_sleep (100);
 
-    msg = bios_proto_encode_metric (
-        NULL,
-        "realpower.default",
-        "epdu",
-        "100",
-        "W",
-        60);
-    assert (msg);
+    msg = bios_proto_encode_metric (NULL, "realpower.default", "switch", "100", "W", 55);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
+    zclock_sleep (100);
 
-    zsys_debug ("TRACE-REQUEST 1");
-    msg = zmsg_new ();
-    rv = mlm_client_sendto (ui, "agent-rt", "xyz", NULL, 5000, &msg);
+    // ===============================================
+    // Test case #1:
+    //      GET ups
+    // Expected:
+    //      2 measurements
+    // ===============================================
+    zmsg_t *send = zmsg_new ();
+    zmsg_addstr (send, "12345");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "ups");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
-    msg = mlm_client_recv (ui);
-    assert (msg);    
-    char *str = zmsg_popstr (msg);
-    while (true) {
+    zmsg_t *reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
 
-    }
-    zmsg_destro (&msg);
-    zclock_sleep (3000);
+    char *uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "12345"));
+    zstr_free (&uuid);
+
+    char *command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    char *element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "ups"));
+    zstr_free (&element);
+
+    zmsg_t *encoded = zmsg_popmsg (reply);
+    assert (encoded);
+
+    bios_proto_t *proto = bios_proto_decode (&encoded);
+    test_assert_proto (proto, "humidity", "ups", "45", "%", 5);
+    bios_proto_destroy (&proto);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded);
+    proto = bios_proto_decode (&encoded);
+    test_assert_proto (proto, "temperature", "ups", "30", "C", 5);
+    bios_proto_destroy (&proto);
+ 
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);   
+
+    zmsg_destroy (&reply);
+
+    // ===============================================
+    // Test case #2:
+    //      1. Change epdu data
+    //      2. GET epdu
+    // Expected:
+    //      1 changed measurement
+    // ===============================================
+
+    msg = bios_proto_encode_metric (NULL, "temperature", "epdu", "70", "C", 29);
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    zclock_sleep (10);
+
+    send = zmsg_new ();
+    zmsg_addstr (send, "12345");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "epdu");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+    reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
+
+    uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "12345"));
+    zstr_free (&uuid);
+
+    command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "epdu"));
+    zstr_free (&element);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded);
+
+    proto = bios_proto_decode (&encoded);
+    test_assert_proto (proto, "temperature", "epdu", "70", "C", 29);
+    bios_proto_destroy (&proto);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);   
+    
+    zmsg_destroy (&reply);
+
+    // ===============================================
+    // Test case #3:
+    //      1. Wait 30500 miliseconds
+    //      2. GET epdu
+    //      3. GET ups
+    // Expected:
+    //      0 measurements
+    //      0 measurements
+    // ===============================================
+    zsys_debug ("Sleeping 30500 miliseconds");
+    zclock_sleep (30500);
+
+    send = zmsg_new ();
+    zmsg_addstr (send, "1234567");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "epdu");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+    reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
+
+    uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "1234567"));
+    zstr_free (&uuid);
+
+    command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "epdu"));
+    zstr_free (&element);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);
+
+    zmsg_destroy (&reply);
+
+    send = zmsg_new ();
+    zmsg_addstr (send, "12345");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "ups");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+    reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
+
+    uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "12345"));
+    zstr_free (&uuid);
+
+    command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "ups"));
+    zstr_free (&element);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);
+
+    zmsg_destroy (&reply);
+
+    // ===============================================
+    // Test case #4:
+    //      1. Wait 35000 miliseconds
+    //      2. GET switch
+    // Expected:
+    //      0 measurements
+    // ===============================================
+    zsys_debug ("Sleeping 30500 miliseconds");
+    zclock_sleep (30500);
+
+    send = zmsg_new ();
+    zmsg_addstr (send, "8CB3E9A9649B4BEF8DE225E9C2CEBB38");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "switch");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+    reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
+
+    uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "8CB3E9A9649B4BEF8DE225E9C2CEBB38"));
+    zstr_free (&uuid);
+
+    command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "switch"));
+    zstr_free (&element);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);
+
+    zmsg_destroy (&reply);
+
+
     zactor_destroy (&rt);
     mlm_client_destroy (&ui);
     mlm_client_destroy (&producer);
     zactor_destroy (&server);
-*/
     //  @end
     printf ("OK\n");
 }
