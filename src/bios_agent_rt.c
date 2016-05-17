@@ -40,7 +40,7 @@ void usage () {
     puts ("bios-agent-rt [options] ...\n"
           "  --log-level / -l       bios log level\n"
           "                         overrides setting in env. variable BIOS_LOG_LEVEL\n"
-          "  --config-file / -c     TODO\n"
+          "  --state-file / -s      TODO\n"
           "  --help / -h            this information\n"
           );
 }
@@ -73,19 +73,19 @@ int main (int argc, char *argv [])
 {
     int help = 0;
     int log_level = -1;
-    char *config_file = NULL;
+    char *state_file = NULL;
 
     while (true) {
         static struct option long_options[] =
         {
             {"help",            no_argument,        0,  1},
             {"log-level",       required_argument,  0,  'l'},
-            {"config-file",    required_argument,   0,  'c'},
+            {"state-file",      required_argument,  0,  's'},
             {0,                 0,                  0,  0}
         };
 
         int option_index = 0;
-        int c = getopt_long (argc, argv, "hl:c:", long_options, &option_index);
+        int c = getopt_long (argc, argv, "hl:s:", long_options, &option_index);
         if (c == -1)
             break;
         switch (c) {
@@ -94,10 +94,9 @@ int main (int argc, char *argv [])
                 log_level = get_log_level (optarg);
                 break;
             }
-            case 'c':
+            case 's':
             {
-                config_file = optarg; 
-                log_warning ("--config-file switch no implemented yet '%s'", config_file);
+                state_file = optarg; 
                 break;
             }
             case 'h':
@@ -136,9 +135,9 @@ int main (int argc, char *argv [])
         log_critical ("zactor_new (task = 'bios_agent_rt_server', args = 'NULL') failed");
         return EXIT_FAILURE;
     }
-//    zstr_sendx (nut_server, "CONFIGURE", mapping_file.c_str (), NULL);
-    zstr_sendx (rt_server, "CONNECT", ENDPOINT, AGENT_NAME, NULL);
-    zstr_sendx (rt_server, "CONSUMER", BIOS_PROTO_STREAM_METRICS, NULL);
+    zstr_sendx (rt_server,  "CONFIGURE", state_file, NULL);
+    zstr_sendx (rt_server,  "CONNECT", ENDPOINT, AGENT_NAME, NULL);
+    zstr_sendx (rt_server,  "CONSUMER", BIOS_PROTO_STREAM_METRICS, NULL);
 
     while (true) {
         char *message = zstr_recv (rt_server);

@@ -31,7 +31,7 @@
 //  Structure of our class
 
 struct _rt_t {
-    zhashx_t *devices;     // hash of hashes ("device name", ("measurement", bios_proto_t*))
+    zhashx_t *devices;      // hash of hashes ("device name", ("measurement", bios_proto_t*))
 };
 
 //  --------------------------------------------------------------------------
@@ -157,6 +157,135 @@ rt_purge (rt_t *self)
     }
 }
 
+//  Load rt from disk
+//  If 'fullpath' is NULL does nothing
+//  0 - success, -1 - error
+int
+rt_load (rt_t *self, const char *fullpath)
+{
+    assert (self);
+    if (!fullpath) 
+        return 0;
+
+    zfile_t *file = zfile_new (NULL, fullpath);
+    if (!file) {
+        log_error ("zfile_new (path = NULL, file = '%s') failed.", fullpath);
+        return -1;
+    }
+    if (!zfile_is_regular (file)) {
+        log_error ("zfile_is_regular () == false");
+        zfile_close (file);
+        zfile_destroy (&file);
+        return -1;
+    }
+    if (zfile_input (file) == -1) {
+        zfile_close (file);
+        zfile_destroy (&file);
+        log_error ("zfile_input () failed; filename = '%s'", zfile_filename (file, NULL));
+        return -1;
+    }
+
+    off_t cursize = zfile_cursize (file);
+    if (cursize == 0) {
+        log_debug ("state file '%s' is empty", zfile_filename (file, NULL));
+        zfile_close (file);
+        zfile_destroy (&file);
+        return 0;
+    }
+
+    zchunk_t *chunk = zchunk_read (zfile_handle (file), cursize);
+    assert (chunk);
+
+    zfile_close (file);
+    zfile_destroy (&file);
+
+    uint64_t offset = 0;
+
+    while (offset < cursize) {
+        byte *prefix = zchunk_data (chunk) + offset;
+        byte *data = zchunk_data (chunk) + offset + sizeof (uint64_t);
+        offset += (uint64_t) *prefix +  sizeof (uint64_t);
+
+        zmsg_t *zmessage = zmsg_decode (data, (size_t) *prefix);
+        assert (zmessage);
+        bios_proto_t *metric = bios_proto_decode (&zmessage); // zmessage destroyed
+        assert (metric);
+
+        rt_put (self, &metric);
+    }
+    zchunk_destroy (&chunk);
+    return 0;
+}
+
+//  Save rt to disk
+//  If 'fullpath' is NULL does nothing
+//  0 - success, -1 - error
+int
+rt_save (rt_t *self, const char *fullpath)
+{
+    assert (self);
+    if (!fullpath)
+        return 0;
+
+    zfile_t *file = zfile_new (NULL, fullpath);
+    if (!file) {
+        log_error ("zfile_new (path = NULL, file = '%s') failed.", fullpath);
+        return -1;
+    }
+
+    zfile_remove (file);
+
+    if (zfile_output (file) == -1) {
+        log_error ("zfile_output () failed; filename = '%s'", zfile_filename (file, NULL));
+        zfile_close (file);
+        zfile_destroy (&file);
+        return -1;
+    }
+
+    zchunk_t *chunk = zchunk_new (NULL, 0); // TODO: this can be tweaked to
+                                            // avoid a lot of allocs
+    assert (chunk);
+
+    zhashx_t *device = (zhashx_t *) zhashx_first (self->devices);
+    while (device) {
+        log_debug ("%s", (const char *) zhashx_cursor (self->devices));
+
+        bios_proto_t *metric = (bios_proto_t *) zhashx_first (device);
+        while (metric) {
+            bios_proto_t *duplicate = bios_proto_dup (metric);
+            assert (duplicate);
+            zmsg_t *zmessage = bios_proto_encode (&duplicate); // duplicate destroyed here
+            assert (zmessage);
+
+            byte *buffer = NULL;
+            uint64_t size = zmsg_encode (zmessage, &buffer);
+            zmsg_destroy (&zmessage);
+
+            assert (buffer);
+            assert (size > 0);
+
+            // prefix
+            zchunk_extend (chunk, (const void *) &size, sizeof (uint64_t));
+            // data
+            zchunk_extend (chunk, (const void *) buffer, size);
+
+            free (buffer); buffer = NULL;
+
+            metric = (bios_proto_t *) zhashx_next (device);
+        }
+        device = (zhashx_t *) zhashx_next (self->devices);
+    }
+    
+    if (zchunk_write (chunk, zfile_handle (file)) == -1) {
+        log_error ("zchunk_write () failed.");
+    }
+
+    zchunk_destroy (&chunk);
+    zfile_close (file);
+    zfile_destroy (&file);
+    return 0;
+}
+
 //  --------------------------------------------------------------------------
 //  Print
 void
@@ -280,6 +409,32 @@ rt_test (bool verbose)
 
     proto = rt_get (self, "bubba", "delka"); // non-existing
     assert (proto == NULL);
+
+    // save/load
+    int rv = rt_save (self, "./test_state_file");
+    assert (rv == 0);
+    rt_t *loaded = rt_new ();
+    rv = rt_load (loaded, "./test_state_file");
+    assert (rv == 0);
+
+    proto = rt_get (loaded, "ups", "temp");
+    test_assert_proto (proto, "temp", "ups", "15", "C", 20);
+
+    proto = rt_get (loaded, "ups", "ahoy");
+    test_assert_proto (proto, "ahoy", "ups", "90", "%", 8);
+
+    proto = rt_get (loaded, "ups", "humidity");
+    test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
+    
+    proto = rt_get (loaded, "epdu", "humidity");
+    test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
+
+    proto = rt_get (loaded, "switch", "load.input");
+    test_assert_proto (proto, "load.input", "switch", "134", "V", 20);
+    
+    proto = rt_get (loaded, "switch", "amperes");
+    test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
+    rt_destroy (&loaded);
 
     // rt_get_element
     zhashx_t *r = rt_get_element (self, "fsfwe");
