@@ -22,6 +22,8 @@
 #ifndef ACTOR_COMMANDS_H_INCLUDED
 #define ACTOR_COMMANDS_H_INCLUDED
 
+#include "rt.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,10 +43,10 @@ extern "C" {
 //  CONSUMER/stream/pattern
 //      consume messages from 'stream' with subjects matching 'pattern'
 //
-//  CONFIGURE/config_file
+//  CONFIGURE/state_file
 //      configure actor, where
-//      config_file - full path to mapping file
-//  ^^^ NOT IMPLEMETED YET - command logic is empty
+//
+//      state_file - full pathname of state file
 
 // Performs the actor commands logic
 // Destroys the message
@@ -52,7 +54,9 @@ extern "C" {
 AGENT_RT_EXPORT int
     actor_commands (
             mlm_client_t *client,
-            zmsg_t **message_p);
+            zmsg_t **message_p,
+            rt_t *data,
+            char **fullpath);
 
 //  Self test of this class
 AGENT_RT_EXPORT void

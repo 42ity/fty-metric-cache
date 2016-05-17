@@ -86,6 +86,7 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
     }
 
     rt_t *data = rt_new ();
+    char *fullpath = NULL;
 
     zsock_signal (pipe, 0);
 
@@ -119,7 +120,7 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
                 log_error ("Given `which == pipe`, function `zmsg_recv (pipe)` returned NULL");
                 continue;
             }
-            if (actor_commands (client, &message) == 1) {
+            if (actor_commands (client, &message, data, &fullpath) == 1) {
                 break;
             }
             continue;
@@ -154,8 +155,10 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
         }
         zmsg_destroy (&message);
     } // while (!zsys_interrupted)
-
+    
+    rt_save (data, fullpath);
     rt_destroy (&data);
+    zstr_free (&fullpath);
     zpoller_destroy (&poller);
     mlm_client_destroy (&client);
 }

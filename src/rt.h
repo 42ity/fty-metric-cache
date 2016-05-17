@@ -51,6 +51,18 @@ AGENT_RT_EXPORT zhashx_t *
 AGENT_RT_EXPORT void
     rt_purge (rt_t *self);
 
+//  Load rt from disk
+//  If 'fullpath' is NULL does nothing
+//  0 - success, -1 - error
+AGENT_RT_EXPORT int
+    rt_load (rt_t *self, const char *fullpath);
+
+//  Save rt to disk
+//  If 'fullpath' is NULL does nothing
+//  0 - success, -1 - error
+AGENT_RT_EXPORT int
+    rt_save (rt_t *self, const char *fullpath);
+
 //  Print
 AGENT_RT_EXPORT void
     rt_print (rt_t *self);

@@ -31,9 +31,13 @@
 int
 actor_commands (
         mlm_client_t *client,
-        zmsg_t **message_p) {
+        zmsg_t **message_p,
+        rt_t *data,
+        char **fullpath) {
 
     assert (message_p && *message_p);
+    assert (data);
+    assert (fullpath);
     zmsg_t *message = *message_p;
     
     char *cmd = zmsg_popstr (message);
@@ -131,18 +135,18 @@ actor_commands (
     }
     else
     if (streq (cmd, "CONFIGURE")) {
-        char *config_file = zmsg_popstr (message);
-        if (!config_file) {
+        char *state_file = zmsg_popstr (message);
+        if (!state_file) {
             log_error (
-                    "Expected multipart string format: CONFIGURE/config_file. "
+                    "Expected multipart string format: CONFIGURE/state_file."
                     "Received CONFIGURE/nullptr");
-            zstr_free (&config_file);
             zstr_free (&cmd);
             zmsg_destroy (message_p);
             return 0;
         }
-        // TODO: implement config file
-        zstr_free (&config_file); 
+        *fullpath = strdup (state_file);
+        rt_load (data, state_file);
+        zstr_free (&state_file); 
     }
     else {
         log_warning ("Command '%s' is unknown or not implemented", cmd);
@@ -191,16 +195,18 @@ actor_commands_test (bool verbose)
     assert (client);
 
     zmsg_t *message = NULL;
-
+    char *fullpath = NULL;
+    rt_t *data = rt_new ();
 
     // --------------------------------------------------------------
     FILE *fp = freopen ("stderr.txt", "w+", stderr);
     // empty message - expected fail
     message = zmsg_new ();
     assert (message);
-    int rv = actor_commands (client, &message);
+    int rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -210,9 +216,10 @@ actor_commands_test (bool verbose)
     message = zmsg_new ();
     assert (message);
     zmsg_addstr (message, "");   
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);  
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -222,9 +229,10 @@ actor_commands_test (bool verbose)
     message = zmsg_new ();
     assert (message);
     zmsg_addstr (message, "MAGIC!");   
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);  
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -235,9 +243,10 @@ actor_commands_test (bool verbose)
     assert (message);
     zmsg_addstr (message, "CONFIGURE");
     // missing config_file here
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -249,9 +258,10 @@ actor_commands_test (bool verbose)
     zmsg_addstr (message, "CONNECT");   
     zmsg_addstr (message, endpoint);
     // missing name here
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -263,9 +273,10 @@ actor_commands_test (bool verbose)
     zmsg_addstr (message, "CONNECT");   
     // missing endpoint here
     // missing name here
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);  
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -277,9 +288,10 @@ actor_commands_test (bool verbose)
     zmsg_addstr (message, "CONNECT");   
     zmsg_addstr (message, "ipc://bios-smtp-server-BAD");
     zmsg_addstr (message, "test-agent");
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);  
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -291,9 +303,10 @@ actor_commands_test (bool verbose)
     zmsg_addstr (message, "CONSUMER");
     zmsg_addstr (message, "some-stream");   
     // missing pattern here
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -305,9 +318,10 @@ actor_commands_test (bool verbose)
     zmsg_addstr (message, "CONSUMER");
     // missing stream here
     // missing pattern here
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -318,9 +332,10 @@ actor_commands_test (bool verbose)
     assert (message);
     zmsg_addstr (message, "PRODUCER");
     // missing stream here
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     STDERR_NON_EMPTY
 
@@ -337,9 +352,10 @@ actor_commands_test (bool verbose)
     message = zmsg_new ();
     assert (message);
     zmsg_addstr (message, "$TERM");   
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 1);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     // CONNECT
     message = zmsg_new ();
@@ -347,9 +363,10 @@ actor_commands_test (bool verbose)
     zmsg_addstr (message, "CONNECT");   
     zmsg_addstr (message, endpoint);
     zmsg_addstr (message, "test-agent");   
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     // CONSUMER
     message = zmsg_new ();
@@ -357,30 +374,36 @@ actor_commands_test (bool verbose)
     zmsg_addstr (message, "CONSUMER");
     zmsg_addstr (message, "some-stream");   
     zmsg_addstr (message, ".+@.+");   
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     // PRODUCER
     message = zmsg_new ();
     assert (message);
     zmsg_addstr (message, "PRODUCER");
     zmsg_addstr (message, "some-stream");   
-    rv = actor_commands (client, &message);
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath == NULL);
 
     // CONFIGURE
     message = zmsg_new ();
     assert (message);
     zmsg_addstr (message, "CONFIGURE");
-    zmsg_addstr (message, "mapping.conf");
-    rv = actor_commands (client, &message);
+    zmsg_addstr (message, "./test_state_file");
+    rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
+    assert (fullpath);
+    assert (streq (fullpath,"./test_state_file"));
+    zstr_free (&fullpath);
 
     STDERR_EMPTY
 
+    rt_destroy (&data);
     zmsg_destroy (&message);
     mlm_client_destroy (&client);
     zactor_destroy (&malamute);
