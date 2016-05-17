@@ -26,10 +26,7 @@
 extern "C" {
 #endif
 
-typedef struct _mailbox_t mailbox_t;
-
 //  @interface
-
 
 /* RFC-todo
 
@@ -62,6 +59,8 @@ typedef struct _mailbox_t mailbox_t;
  has bad format or the subject is incorrect, RT-PROVIDER peer SHALL NOT respond back.
  
 */
+
+#define RFC_RT_DATA_SUBJECT "latest-rt-data"
 
 //  Perform mailbox deliver protocol
 AGENT_RT_EXPORT void
