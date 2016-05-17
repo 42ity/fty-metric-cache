@@ -137,7 +137,7 @@ int main (int argc, char *argv [])
     }
     zstr_sendx (rt_server,  "CONFIGURE", state_file, NULL);
     zstr_sendx (rt_server,  "CONNECT", ENDPOINT, AGENT_NAME, NULL);
-    zstr_sendx (rt_server,  "CONSUMER", BIOS_PROTO_STREAM_METRICS, NULL);
+    zstr_sendx (rt_server,  "CONSUMER", BIOS_PROTO_STREAM_METRICS, ".*", NULL);
 
     while (true) {
         char *message = zstr_recv (rt_server);
