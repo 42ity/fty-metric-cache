@@ -135,13 +135,24 @@ rt_purge (rt_t *self)
     zhashx_t *device = (zhashx_t *) zhashx_first (self->devices);
     while (device) {
         bios_proto_t *metric = (bios_proto_t *) zhashx_first (device);
-        while (metric) {
+
+        zlistx_t *to_delete = zlistx_new ();
+        zlistx_set_destructor (to_delete, (czmq_destructor *) zstr_free);
+        zlistx_set_duplicator (to_delete, (czmq_duplicator *) strdup);
+
+        while (metric) { 
             uint64_t time = bios_proto_aux_number (metric, "time", 0);
-            if (time + (bios_proto_ttl (metric) * 1000) < timestamp) {
-                zhashx_delete (device, (const char *) zhashx_cursor (device));
-            } 
+            if (timestamp - time > bios_proto_ttl (metric) * 1000) {
+                zlistx_add_end (to_delete, (void *) zhashx_cursor (device));
+            }
             metric = (bios_proto_t *) zhashx_next (device);
         }
+        char *cursor = (char *) zlistx_first (to_delete);
+        while (cursor) {
+            zhashx_delete (device, (char *) cursor);
+            cursor = (char *) zlistx_next (to_delete);
+        }
+        zlistx_destroy (&to_delete);
         device = (zhashx_t *) zhashx_next (self->devices);
     }
 }
@@ -230,10 +241,13 @@ rt_test (bool verbose)
     self = rt_new ();
 
     // fill
-    bios_proto_t *metric = test_metric_new ("temp", "ups", "15", "C", 10);
+    bios_proto_t *metric = test_metric_new ("temp", "ups", "15", "C", 20);
     rt_put (self, &metric);    
 
-    metric = test_metric_new ("humidity", "ups", "40", "%", 20);
+    metric = test_metric_new ("humidity", "ups", "40", "%", 10);
+    rt_put (self, &metric);
+
+    metric = test_metric_new ("ahoy", "ups", "90", "%", 8);
     rt_put (self, &metric);
 
     metric = test_metric_new ("humidity", "epdu", "21", "%", 10);
@@ -247,10 +261,13 @@ rt_test (bool verbose)
 
     // test
     bios_proto_t *proto = rt_get (self, "ups", "temp");
-    test_assert_proto (proto, "temp", "ups", "15", "C", 10);
+    test_assert_proto (proto, "temp", "ups", "15", "C", 20);
+
+    proto = rt_get (self, "ups", "ahoy");
+    test_assert_proto (proto, "ahoy", "ups", "90", "%", 8);
 
     proto = rt_get (self, "ups", "humidity");
-    test_assert_proto (proto, "humidity", "ups", "40", "%", 20);
+    test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
     
     proto = rt_get (self, "epdu", "humidity");
     test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
@@ -269,25 +286,32 @@ rt_test (bool verbose)
     assert (r == NULL);
     r = rt_get_element (self, "ups");
     assert (r);
-    assert (zhashx_size (r) == 2);
+    assert (zhashx_size (r) == 3);
 
     proto = (bios_proto_t *) zhashx_lookup (r, "temp");
     assert (proto);
-    test_assert_proto (proto, "temp", "ups", "15", "C", 10);
+    test_assert_proto (proto, "temp", "ups", "15", "C", 20);
+
+    proto = (bios_proto_t *) zhashx_lookup (r, "ahoy");
+    assert (proto);
+    test_assert_proto (proto, "ahoy", "ups", "90", "%", 8);
 
     proto = (bios_proto_t *) zhashx_lookup (r, "humidity");
     assert (proto);
-    test_assert_proto (proto, "humidity", "ups", "40", "%", 20);
+    test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
 
     assert (zhashx_lookup (r, "load.input") == NULL);
 
     // purge imediatelly, nothing should be removed
     rt_purge (self);
     proto = rt_get (self, "ups", "temp");
-    test_assert_proto (proto, "temp", "ups", "15", "C", 10);
+    test_assert_proto (proto, "temp", "ups", "15", "C", 20);
+
+    proto = rt_get (self, "ups", "ahoy");
+    test_assert_proto (proto, "ahoy", "ups", "90", "%", 8);
 
     proto = rt_get (self, "ups", "humidity");
-    test_assert_proto (proto, "humidity", "ups", "40", "%", 20);
+    test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
     
     proto = rt_get (self, "epdu", "humidity");
     test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
@@ -298,11 +322,11 @@ rt_test (bool verbose)
     proto = rt_get (self, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
 
-    // change (ups, temp) and test
-    metric = test_metric_new ("temp", "ups", "170", "K", 8);
+    // change (ups, humidity) and test
+    metric = test_metric_new ("humidity", "ups", "33", "%", 8);
     rt_put (self, &metric);   
-    proto = rt_get (self, "ups", "temp");
-    test_assert_proto (proto, "temp", "ups", "170", "K", 8);
+    proto = rt_get (self, "ups", "humidity");
+    test_assert_proto (proto, "humidity", "ups", "33", "%", 8);
 
     // change (switch, load.input)
     metric = test_metric_new ("load.input", "switch", "1000", "kV", 21);
@@ -314,10 +338,13 @@ rt_test (bool verbose)
 
     // test 
     proto = rt_get (self, "ups", "temp");
+    test_assert_proto (proto, "temp", "ups", "15", "C", 20);
+
+    proto = rt_get (self, "ups", "ahoy");
     assert (proto == NULL);
 
     proto = rt_get (self, "ups", "humidity");
-    test_assert_proto (proto, "humidity", "ups", "40", "%", 20);
+    assert (proto == NULL);
     
     proto = rt_get (self, "epdu", "humidity");
     test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
@@ -372,7 +399,6 @@ rt_test (bool verbose)
     rt_purge (self);
 
     rt_destroy (&self);
-
  
     //  @end
     printf ("OK\n");

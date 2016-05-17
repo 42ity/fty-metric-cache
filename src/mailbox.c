@@ -28,8 +28,6 @@
 
 #include "agent_rt_classes.h"
 
-#define RFC_RT_DATA_SUBJECT "latest-rt-data"
-
 //  --------------------------------------------------------------------------
 //  Perform mailbox deliver protocol
 void
