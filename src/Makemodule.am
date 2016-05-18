@@ -55,6 +55,8 @@ src_bios_agent_rt_configdir = $(sysconfdir)/agent-rt
 if WITH_SYSTEMD_UNITS
 src_bios_agent_rt_servicedir = @prefix@/lib/systemd/system
 src_bios_agent_rt_service_DATA = src/bios-agent-rt.service
+src_bios_agent_rt_tmpfilesdir = @prefix@/lib/tmpfiles.d/
+src_bios_agent_rt_tmpfiles_DATA = src/bios-agent-rt.conf
 endif #WITH_SYSTEMD_UNITS
 endif #ENABLE_BIOS_AGENT_RT
 

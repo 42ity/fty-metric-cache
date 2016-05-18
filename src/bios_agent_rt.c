@@ -33,6 +33,7 @@
 
 static const char *AGENT_NAME = "agent-rt";
 static const char *ENDPOINT = "ipc://@/malamute";
+static const char *STATE_FILE = "/var/lib/bios/bios-agent-rt/state_file";
 
 #define DEFAULT_LOG_LEVEL LOG_WARNING
 
@@ -129,6 +130,11 @@ int main (int argc, char *argv [])
         }
     }
     log_set_level (log_level);
+
+    // Set default state file on empty
+    if (!state_file) {
+        state_file = (char *) STATE_FILE;
+    }
 
     zactor_t *rt_server = zactor_new (bios_agent_rt_server, (void *) NULL);
     if (!rt_server) {
