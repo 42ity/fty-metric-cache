@@ -94,6 +94,6 @@ find %{buildroot} -name '*.la' | xargs rm -f
 %defattr(-,root,root)
 %{_bindir}/bios-agent-rt
 %{_prefix}/lib/systemd/system/bios-agent-rt*.service
-
+%{_prefix}/lib/tmpfiles.d/bios-agent-rt.conf
 
 %changelog

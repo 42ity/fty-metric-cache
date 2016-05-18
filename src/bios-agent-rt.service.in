@@ -1,10 +1,12 @@
 [Unit]
-Description=BIOS have info about all current metrics and is able to share it via REQ-REP
+Description=bios-agent-rt service
+Requires=malamute.service
 After=malamute.service
 PartOf=bios.target
 
 [Service]
 Type=simple
+User=bios
 Environment="prefix=@prefix@"
 EnvironmentFile=-/usr/share/bios/etc/default/bios
 EnvironmentFile=-/usr/share/bios/etc/default/bios__%n.conf
