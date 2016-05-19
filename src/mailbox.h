@@ -58,6 +58,13 @@ extern "C" {
  In case the UI peer sends a message to RT-PROVIDER not conforming to 1), i.e. the message
  has bad format or the subject is incorrect, RT-PROVIDER peer SHALL NOT respond back.
  
+ Send comand for print data:
+ 
+   1) (empty)/PRINT/NULL  ==> Print all information in the agent (all devices with all metrics)
+   
+   2) (empty)/PRINT_DEVICES/NULL  ==> Print lis of all devices in the agent
+   
+   3) (empty)/DEVICE_INFO/(device name)  ==> Print all metrics for one device
 */
 
 #define RFC_RT_DATA_SUBJECT "latest-rt-data"

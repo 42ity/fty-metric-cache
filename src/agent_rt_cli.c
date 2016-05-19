@@ -41,6 +41,25 @@ void send_test(){
     mlm_client_destroy(&producer);
 }
 
+void print_device(const char *device, mlm_client_t *ui){
+    zmsg_t *send = zmsg_new ();
+    zmsg_addstr (send, "");
+    zmsg_addstr (send, "DEVICE_INFO");
+    zmsg_addstr (send, device);
+    
+    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+}
+
+void list_devices(mlm_client_t *ui){
+    zmsg_t *send = zmsg_new ();
+    zmsg_addstr (send, "");
+    zmsg_addstr (send, "PRINT_DEVICES");
+    
+    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+}
+
 void print_all(mlm_client_t *ui){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
@@ -54,29 +73,43 @@ int main (int argc, char *argv [])
 {
     bool verbose = false;
     int argn;
-    for (argn = 1; argn < argc; argn++) {
+    
+    mlm_client_t *ui = mlm_client_new ();
+    mlm_client_connect (ui, endpoint, 1000, "UI");
+    
+    if(argc == 1) 
+      print_all(ui);
+    else 
+      for (argn = 1; argn < argc; argn++) {
         if (streq (argv [argn], "--help")
         ||  streq (argv [argn], "-h")) {
-            puts ("agent-rt-cli [options] ...");
+            puts ("agent-rt-cli [options]");
+            puts ("agent-rt-cli [device]    print all information of the device");
+            puts ("agent-rt-cli             print all information in the agent");
+            puts ("  --list / -l            print list of devices in the agent");
             puts ("  --verbose / -v         verbose test output");
             puts ("  --help / -h            this information");
-            return 0;
+            break;
         }
         else
         if (streq (argv [argn], "--verbose")
         ||  streq (argv [argn], "-v"))
             verbose = true;
-        else {
-            printf ("Unknown option: %s\n", argv [argn]);
-            return 1;
+        else 
+        if (streq (argv [argn], "--list")
+        ||  streq (argv [argn], "-l")){
+            list_devices(ui);
+            break;
+        }
+        else{
+            print_device(argv [argn], ui);
+            break;
         }
     }
     
-    mlm_client_t *ui = mlm_client_new ();
-    mlm_client_connect (ui, endpoint, 1000, "UI");
-    
+    //Debigging
     send_test();
-    print_all(ui);
+    //End debugging
     
     if (verbose)
         zsys_info ("agent_rt_cli - Command line interface for agent-rt");

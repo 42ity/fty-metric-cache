@@ -78,6 +78,20 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         
         rt_print(data);
         
+    }else
+      if (streq (command, "PRINT_DEVICES")){
+        zstr_free (&command);
+        
+        rt_print_list (data);
+        
+    }else if (streq (command, "DEVICE_INFO")){
+        zstr_free (&command);
+        if(!(element = zmsg_popstr (msg)))log_warning (
+                "Bad request. no device missing"
+                " Sender: '%s', Subject: '%s'.",
+                mlm_client_sender (client), mlm_client_subject (client));
+        rt_print_device (element ,data);
+        
     }else if(streq (command, "GET")){
       zstr_free (&command);
       // check element
