@@ -12,7 +12,7 @@ AC_INIT([agent-rt],[0.1.0],[bios@eaton.com])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR(config)
 AC_CONFIG_HEADERS([src/platform.h])
-AM_INIT_AUTOMAKE([subdir-objects tar-ustar foreign])
+AM_INIT_AUTOMAKE([subdir-objects tar-ustar dist-zip foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # This defines PACKAGE_VERSION_... in src/platform.h
@@ -426,6 +426,16 @@ AC_ARG_ENABLE([bios-agent-rt],
 
 AM_CONDITIONAL([ENABLE_BIOS_AGENT_RT], [test x$enable_bios_agent_rt != xno])
 AM_COND_IF([ENABLE_BIOS_AGENT_RT], [AC_MSG_NOTICE([ENABLE_BIOS_AGENT_RT defined])])
+
+# Check for agent-rt-cli intent
+AC_ARG_ENABLE([agent-rt-cli],
+    AS_HELP_STRING([--enable-agent-rt-cli],
+        [Compile and install 'agent-rt-cli' [default=yes]]),
+    [enable_agent_rt_cli=$enableval],
+    [enable_agent_rt_cli=yes])
+
+AM_CONDITIONAL([ENABLE_AGENT_RT_CLI], [test x$enable_agent_rt_cli != xno])
+AM_COND_IF([ENABLE_AGENT_RT_CLI], [AC_MSG_NOTICE([ENABLE_AGENT_RT_CLI defined])])
 
 # Check for agent_rt_selftest intent
 AC_ARG_ENABLE([agent_rt_selftest],

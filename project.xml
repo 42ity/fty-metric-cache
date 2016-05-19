@@ -35,5 +35,8 @@
     <main name = "bios-agent-rt" service = "1" no_config = "1">
         Listens on all metrics in order to remeber the last ones.
     </main>
+    <main name = "agent-rt-cli">
+        Command line interface for agent-rt
+    </main>
 
 </project>
