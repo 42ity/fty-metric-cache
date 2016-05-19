@@ -60,8 +60,9 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         return;
     }
     // check 'GET' command
+    char *element = NULL;
     char *command = zmsg_popstr (msg);
-    if (!command || !streq (command, "GET")) {
+    if (!command) {
         zmsg_destroy (msg_p);
         zstr_free (&command);        
         zstr_free (&uuid);
@@ -71,21 +72,26 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
-    zstr_free (&command);
-    // check element
-    char *element = zmsg_popstr (msg);
-    if (!element) {
-        zmsg_destroy (msg_p);
-        zstr_free (&uuid);
-        log_warning (
+    
+    if (streq (command, "PRINT")){
+        zstr_free (&command);
+        
+        rt_print(data);
+        
+    }else if(streq (command, "GET")){
+      zstr_free (&command);
+      // check element
+      element = zmsg_popstr (msg);
+      if (!element) {
+          zmsg_destroy (msg_p);
+          zstr_free (&uuid);
+          log_warning (
                 "Bad message. Expected multipart string message `uuid/GET/element`"
                 " - 'GET' missing or different string. Sender: '%s', Subject: '%s'.",
                 mlm_client_sender (client), mlm_client_subject (client));
-        return;
-    }
-    zmsg_destroy (msg_p);
-
-    zmsg_t *reply = zmsg_new ();
+          return;
+      }
+      zmsg_t *reply = zmsg_new ();
     zmsg_addstr (reply, uuid);
     zmsg_addstr (reply, "OK");
     zmsg_addstr (reply, element);
@@ -110,6 +116,18 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 "mlm_client_sendto (sender = '%s', subject = '%s', timeout = '5000') failed.",
                 mlm_client_sender (client), RFC_RT_DATA_SUBJECT);
     }
+      
+    }else{
+        zmsg_destroy (msg_p);
+        zstr_free (&command);        
+        zstr_free (&uuid);
+        log_warning (
+                "Unrecognized command. Sender: '%s', Subject: '%s'.",
+                mlm_client_sender (client), mlm_client_subject (client));
+        return;
+    }
+    zmsg_destroy (msg_p);
+    
 }
 
 //  --------------------------------------------------------------------------
