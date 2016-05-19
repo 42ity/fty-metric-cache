@@ -60,6 +60,13 @@ src_bios_agent_rt_tmpfiles_DATA = src/bios-agent-rt.conf
 endif #WITH_SYSTEMD_UNITS
 endif #ENABLE_BIOS_AGENT_RT
 
+if ENABLE_AGENT_RT_CLI
+bin_PROGRAMS += src/agent-rt-cli
+src_agent_rt_cli_CPPFLAGS = ${AM_CPPFLAGS}
+src_agent_rt_cli_LDADD = ${program_libs}
+src_agent_rt_cli_SOURCES = src/agent_rt_cli.c
+endif #ENABLE_AGENT_RT_CLI
+
 if ENABLE_AGENT_RT_SELFTEST
 check_PROGRAMS += src/agent_rt_selftest
 noinst_PROGRAMS += src/agent_rt_selftest
@@ -71,37 +78,38 @@ endif #ENABLE_AGENT_RT_SELFTEST
 # define custom target for all products of /src
 src:
 	src/bios-agent-rt \
+	src/agent-rt-cli \
 	src/agent_rt_selftest \
 	src/libagent_rt.la
 
 	cd $(srcdir); gsl -target:- project.xml
 
 check-local: src/agent_rt_selftest
-	$(LIBTOOL) --mode=execute $(srcdir)/src/agent_rt_selftest
+	$(LIBTOOL) --mode=execute $(builddir)/src/agent_rt_selftest
 
 check-verbose: src/agent_rt_selftest
-	$(LIBTOOL) --mode=execute $(srcdir)/src/agent_rt_selftest -v
+	$(LIBTOOL) --mode=execute $(builddir)/src/agent_rt_selftest -v
 
 # Run the selftest binary under valgrind to check for memory leaks
 memcheck: src/agent_rt_selftest
 	$(LIBTOOL) --mode=execute valgrind --tool=memcheck \
 		--leak-check=full --show-reachable=yes --error-exitcode=1 \
 		--suppressions=$(srcdir)/src/.valgrind.supp \
-		$(srcdir)/src/agent_rt_selftest
+		$(builddir)/src/agent_rt_selftest
 
 # Run the selftest binary under valgrind to check for performance leaks
 callcheck: src/agent_rt_selftest
 	$(LIBTOOL) --mode=execute valgrind --tool=callgrind \
-		$(srcdir)/src/agent_rt_selftest
+		$(builddir)/src/agent_rt_selftest
 
 # Run the selftest binary under gdb for debugging
 debug: src/agent_rt_selftest
 	$(LIBTOOL) --mode=execute gdb -q \
-		$(srcdir)/src/agent_rt_selftest
+		$(builddir)/src/agent_rt_selftest
 
 # Run the selftest binary with verbose switch for tracing
 animate: src/agent_rt_selftest
-	$(LIBTOOL) --mode=execute $(srcdir)/src/agent_rt_selftest -v
+	$(LIBTOOL) --mode=execute $(builddir)/src/agent_rt_selftest -v
 
 if WITH_GCOV
 coverage: src/agent_rt_selftest

@@ -1,3 +1,4 @@
 usr/bin/bios-agent-rt
+usr/bin/agent-rt-cli
 usr/lib/systemd/system/bios-agent-rt*.service
 usr/lib/tmpfiles.d/bios-agent-rt.conf

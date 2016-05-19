@@ -53,7 +53,6 @@ This package contains shared library.
 
 %files -n libagent_rt0
 %defattr(-,root,root)
-%doc COPYING
 %{_libdir}/libagent_rt.so.*
 
 %package devel
@@ -93,7 +92,9 @@ find %{buildroot} -name '*.la' | xargs rm -f
 %files
 %defattr(-,root,root)
 %{_bindir}/bios-agent-rt
+%{_bindir}/agent-rt-cli
 %{_prefix}/lib/systemd/system/bios-agent-rt*.service
 %{_prefix}/lib/tmpfiles.d/bios-agent-rt.conf
+
 
 %changelog
