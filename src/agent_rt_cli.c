@@ -30,22 +30,24 @@
 
 const char *endpoint = "ipc://@/malamute";
 
-void test(mlm_client_t *ui){
+void send_test(){
     mlm_client_t *producer = mlm_client_new ();
     mlm_client_connect (producer, endpoint, 1000, "PRODUCER");
     mlm_client_set_producer (producer, "METRICS");
     zmsg_t *msg = bios_proto_encode_metric (NULL, "temperature", "ups", "30", "C", 5);
     int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
-    //zclock_sleep (100);
     
-    zmsg_t *send = zmsg_new ();
-    zmsg_addstr (send, "12345");
-    zmsg_addstr (send, "PRINT");
-    zmsg_addstr (send, "ups");
-    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
-    assert (rv == 0);
     mlm_client_destroy(&producer);
+}
+
+void print_all(mlm_client_t *ui){
+    zmsg_t *send = zmsg_new ();
+    zmsg_addstr (send, "");
+    zmsg_addstr (send, "PRINT");
+    
+    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
 }
 
 int main (int argc, char *argv [])
@@ -73,7 +75,8 @@ int main (int argc, char *argv [])
     mlm_client_t *ui = mlm_client_new ();
     mlm_client_connect (ui, endpoint, 1000, "UI");
     
-    test(ui);
+    send_test();
+    print_all(ui);
     
     if (verbose)
         zsys_info ("agent_rt_cli - Command line interface for agent-rt");
