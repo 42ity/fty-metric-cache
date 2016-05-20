@@ -354,19 +354,20 @@ rt_get_device_info (const char *name, rt_t *self)
         if(streq(name, (const char *) zhashx_cursor (self->devices))){
           bios_proto_t *metric = (bios_proto_t *) zhashx_first (device);
           while (metric) {
+                    strcat(info, "\nElement: ");
                     strcat (info, (const char *) zhashx_cursor (device));
-                    strcat(info, "\n");
+                    strcat(info, "\nTimestamp: ");
                     sprintf (info_aux, "%" PRIu64"", bios_proto_aux_number (metric, "time", 0));
                     strcat(info, info_aux);
-                    strcat(info, "\n");
+                    strcat(info, "\nType: ");
                     strcat (info, bios_proto_type (metric));
-                    strcat(info, "\n");
+                    strcat(info, "\nDevice: ");
                     strcat (info, bios_proto_element_src (metric));
-                    strcat(info, "\n");
+                    strcat(info, "\nValue: ");
                     strcat (info, bios_proto_value (metric));
-                    strcat(info, "\n");
+                    strcat(info, " ");
                     strcat (info, bios_proto_unit (metric));
-                    strcat(info, "\n");
+                    strcat(info, "\nTime to live: ");
                     sprintf (info_aux, "%" PRIu32"", bios_proto_ttl (metric));
                     strcat(info, info_aux);
                     strcat(info, "\n");
@@ -377,7 +378,7 @@ rt_get_device_info (const char *name, rt_t *self)
         device = (zhashx_t *) zhashx_next (self->devices);
     }
     if (flag == 0)
-      strcat (info, "Device not found");
+      strcat (info, "Device not found\n");
     return info;
 }
 

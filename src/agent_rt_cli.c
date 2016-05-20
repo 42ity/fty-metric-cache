@@ -40,7 +40,7 @@ void send_test(){
     int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     
-    msg = bios_proto_encode_metric (NULL, "temperature", "ups2", "30", "C", 25);
+    msg = bios_proto_encode_metric (NULL, "temperature", "ups2", "20", "C", 25);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     
@@ -48,7 +48,23 @@ void send_test(){
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     
-    msg = bios_proto_encode_metric (NULL, "humidity", "ups2", "30", "h", 10);
+    msg = bios_proto_encode_metric (NULL, "humidity", "ups2", "22", "h", 10);
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    
+    msg = bios_proto_encode_metric (NULL, "temperature", "pdu", "35", "C", 15);
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    
+    msg = bios_proto_encode_metric (NULL, "temperature", "pdu2", "10", "C", 25);
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    
+    msg = bios_proto_encode_metric (NULL, "humidity", "pdu", "30", "h", 5);
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    
+    msg = bios_proto_encode_metric (NULL, "humidity", "pdu2", "20", "h", 10);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     
@@ -111,9 +127,12 @@ int main (int argc, char *argv [])
     mlm_client_t *cli = mlm_client_new ();
     mlm_client_connect (cli, endpoint, 1000, "CLI");
     
-    //if(argc == 1) 
+    //Debigging
+    if(argc == 1)
+      send_test();
     //  print_all(ui);
-    //else 
+    else 
+    //End debugging
       for (argn = 1; argn < argc; argn++) {
         if (streq (argv [argn], "--help")
         ||  streq (argv [argn], "-h")) {
@@ -139,10 +158,6 @@ int main (int argc, char *argv [])
             break;
         }
     }
-    
-    //Debigging
-    send_test();
-    //End debugging
     
     if (verbose)
         zsys_info ("agent_rt_cli - Command line interface for agent-rt");
