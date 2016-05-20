@@ -68,12 +68,12 @@ AGENT_RT_EXPORT void
     rt_print (rt_t *self);
 
 //  Print list devices
-AGENT_RT_EXPORT void
-    rt_print_list (rt_t *self);
+AGENT_RT_EXPORT char *
+    rt_get_list_devices  (rt_t *self);
     
 //  Print info of device
-AGENT_RT_EXPORT void
-    rt_print_device (const char *name, rt_t *self);
+AGENT_RT_EXPORT char *
+    rt_get_device_info (const char *name, rt_t *self);
 //  Destroy the rt
 AGENT_RT_EXPORT void
     rt_destroy (rt_t **self_p);
