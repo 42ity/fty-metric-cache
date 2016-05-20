@@ -28,6 +28,7 @@
 
 #include "agent_rt_classes.h"
 
+#define ENDPOINT "ipc://@/malamute"
 //  --------------------------------------------------------------------------
 //  Perform mailbox deliver protocol
 void
@@ -73,16 +74,24 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         return;
     }
     
-    if (streq (command, "PRINT")){
+    /*if (streq (command, "PRINT")){
         zstr_free (&command);
         
-        rt_print(data);
+        zmsg_t *send = zmsg_new ();
+        zmsg_addstr (send, "Hello");
+    
+        int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+        assert (rv == 0);
         
-    }else
+    }else*/
       if (streq (command, "PRINT_DEVICES")){
         zstr_free (&command);
         
-        rt_print_list (data);
+        zmsg_t *send = zmsg_new ();
+        zmsg_addstr (send, rt_get_list_devices(data));
+        
+        int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+        assert (rv == 0);
         
     }else if (streq (command, "DEVICE_INFO")){
         zstr_free (&command);
@@ -90,7 +99,12 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 "Bad request. no device missing"
                 " Sender: '%s', Subject: '%s'.",
                 mlm_client_sender (client), mlm_client_subject (client));
-        rt_print_device (element ,data);
+        
+        zmsg_t *send = zmsg_new ();
+        zmsg_addstr (send, rt_get_device_info(element, data));
+    
+        int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+        assert (rv == 0);
         
     }else if(streq (command, "GET")){
       zstr_free (&command);
