@@ -34,7 +34,8 @@ extern "C" {
 
  The UI peer sends the following message using MAILBOX SEND to RT-PROVIDER peer:
 
-    1) uuid/GET/element - Request latest real time measurements of element
+    1) uuid/LIST        - Request list of elements 
+    2) uuid/GET/element - Request latest real time measurements of element
 
     where
         * '/' indicates a multipart _string_ message
@@ -44,25 +45,22 @@ extern "C" {
         
  The RT-PROVIDER peer MUST respond with one of the following messages:
     
-    2) uuid/OK/element/data^i
+    3) uuid/OK/LIST/element_name^i
+    4) uuid/OK/GET/element/data^i
 
     where
         * '/' indicates a multipart _frame_ message
         * 'uuid' is string, MUST be repeated from request message 1)
-        * 'element' is string, MUST be repeated from request message 1)
+        * 'element' is string, MUST be repeated from request message 1)        *
         * 'data^i' is anywhere between 0 to N frames, each with encoded bios_proto_t METRIC
             (i.e. one of latest real time measurements of requested element).
             Zero frames mean given element  has no latest measurements or does not exist.
+        * 'element_name^i' is anywhere between 0 to N strings, each representing one element.
+            Zero strings mean there are no elements being stored yet. 
         * subject of the message MUST be repeated from request message 1)
 
  In case the UI peer sends a message to RT-PROVIDER not conforming to 1), i.e. the message
  has bad format or the subject is incorrect, RT-PROVIDER peer SHALL NOT respond back.
- 
- Send comand for print data:
- 
-   1) (empty)/PRINT/NULL  ==> Print all information in the agent (all devices with all metrics)
-   
-   2) (empty)/PRINT_DEVICES/NULL  ==> Print lis of all devices in the agent
 
 */
 
