@@ -74,7 +74,7 @@ void send_test(){
 void print_device(const char *device, mlm_client_t *ui){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
-    zmsg_addstr (send, "DEVICE_INFO");
+    zmsg_addstr (send, "GET");
     zmsg_addstr (send, device);
     
     int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
@@ -84,20 +84,11 @@ void print_device(const char *device, mlm_client_t *ui){
 void list_devices(mlm_client_t *ui){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
-    zmsg_addstr (send, "PRINT_DEVICES");
+    zmsg_addstr (send, "LIST");
     
     int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
-
-/*void print_all(mlm_client_t *ui){
-    zmsg_t *send = zmsg_new ();
-    zmsg_addstr (send, "");
-    zmsg_addstr (send, "PRINT");
-    
-    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
-    assert (rv == 0);
-}*/
 
 zmsg_t *
 reciver (mlm_client_t *client, int timeout)
@@ -164,9 +155,29 @@ int main (int argc, char *argv [])
     
         zmsg_t *msg = reciver (cli, 1000);
         if (msg) {
-            char *reply = zmsg_popstr (msg);
-            printf ("%s", reply);
-            free (reply);
+            char *uuid = zmsg_popstr (msg);
+            char *confirmation = zmsg_popstr (msg);
+            char *command = zmsg_popstr (msg);
+            char *reply = NULL;
+            if(streq(command, "LIST")){
+                reply = zmsg_popstr (msg);
+                printf ("%s", reply);
+                free (reply);
+            }else{
+                printf("Device: %s\n", command);
+                zmsg_t *msg_part = zmsg_popmsg(msg);
+                bios_proto_t *bios_p_element;
+                while(msg_part){
+                  bios_p_element = bios_proto_decode(&msg_part);
+                  bios_proto_print(bios_p_element);
+                  bios_proto_destroy(&bios_p_element);
+                  msg_part = zmsg_popmsg(msg);
+                }
+            }
+            free (uuid);
+            free (confirmation);
+            free (command);
+            
             zmsg_destroy (&msg);
             zclock_sleep (100);
         }
