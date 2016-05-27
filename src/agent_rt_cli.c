@@ -120,7 +120,13 @@ int main (int argc, char *argv [])
                 bios_proto_t *bios_p_element;
                 while(msg_part){
                   bios_p_element = bios_proto_decode(&msg_part);
-                  bios_proto_print(bios_p_element);
+                  printf("Device: %s - Element: %s  Timestamp: %" PRIu64"  Value: %s %s  Ttl: %" PRIu32" seconds\n",
+                    bios_proto_element_src (bios_p_element),
+                    bios_proto_type (bios_p_element),
+                    bios_proto_aux_number (bios_p_element, "time", 0),
+                    bios_proto_value (bios_p_element),
+                    bios_proto_unit (bios_p_element),
+                    bios_proto_ttl (bios_p_element));
                   bios_proto_destroy(&bios_p_element);
                   msg_part = zmsg_popmsg(msg);
                 }
