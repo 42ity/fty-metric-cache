@@ -74,36 +74,17 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         return;
     }
     
-    /*if (streq (command, "PRINT")){
-        zstr_free (&command);
+      if (streq (command, "LIST")){
         
         zmsg_t *send = zmsg_new ();
-        zmsg_addstr (send, "Hello");
-    
-        int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
-        assert (rv == 0);
-        
-    }else*/
-      if (streq (command, "PRINT_DEVICES")){
-        zstr_free (&command);
-        
-        zmsg_t *send = zmsg_new ();
+        zmsg_addstr (send, uuid);
+        zmsg_addstr (send, "OK");
+        zmsg_addstr (send, command);
         zmsg_addstr (send, rt_get_list_devices(data));
         
-        int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
-        assert (rv == 0);
-        
-    }else if (streq (command, "DEVICE_INFO")){
         zstr_free (&command);
-        if(!(element = zmsg_popstr (msg)))log_warning (
-                "Bad request. no device missing"
-                " Sender: '%s', Subject: '%s'.",
-                mlm_client_sender (client), mlm_client_subject (client));
         
-        zmsg_t *send = zmsg_new ();
-        zmsg_addstr (send, rt_get_device_info(element, data));
-    
-        int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+        int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
         assert (rv == 0);
         
     }else if(streq (command, "GET")){
@@ -137,8 +118,9 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
 
     zstr_free (&uuid);
     zstr_free (&element);
-
-    int rv = mlm_client_sendto (client, mlm_client_sender (client), RFC_RT_DATA_SUBJECT, NULL, 5000, &reply);
+    
+    int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &reply);
+    
     if (rv != 0) {
         log_error (
                 "mlm_client_sendto (sender = '%s', subject = '%s', timeout = '5000') failed.",
@@ -157,7 +139,6 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
     zmsg_destroy (msg_p);
     
 }
-
 //  --------------------------------------------------------------------------
 //  Self test of this class
 

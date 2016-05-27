@@ -31,73 +31,24 @@
 const char *endpoint = "ipc://@/malamute";
 zpoller_t *poller = NULL;
 
-void send_test(){
-    mlm_client_t *producer = mlm_client_new ();
-    mlm_client_connect (producer, endpoint, 1000, "PRODUCER");
-    mlm_client_set_producer (producer, "METRICS");
-    
-    zmsg_t *msg = bios_proto_encode_metric (NULL, "temperature", "ups", "30", "C", 15);
-    int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "temperature", "ups2", "20", "C", 25);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "ups", "30", "h", 5);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "ups2", "22", "h", 10);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "temperature", "pdu", "35", "C", 15);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "temperature", "pdu2", "10", "C", 25);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "pdu", "30", "h", 5);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "pdu2", "20", "h", 10);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    mlm_client_destroy(&producer);
-}
-
-void print_device(const char *device, mlm_client_t *ui){
+void print_device(const char *device, mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
-    zmsg_addstr (send, "DEVICE_INFO");
+    zmsg_addstr (send, "GET");
     zmsg_addstr (send, device);
     
-    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
 
-void list_devices(mlm_client_t *ui){
+void list_devices(mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
-    zmsg_addstr (send, "PRINT_DEVICES");
+    zmsg_addstr (send, "LIST");
     
-    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
-
-/*void print_all(mlm_client_t *ui){
-    zmsg_t *send = zmsg_new ();
-    zmsg_addstr (send, "");
-    zmsg_addstr (send, "PRINT");
-    
-    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
-    assert (rv == 0);
-}*/
 
 zmsg_t *
 reciver (mlm_client_t *client, int timeout)
@@ -121,18 +72,9 @@ int main (int argc, char *argv [])
     bool verbose = false;
     int argn;
     
-    mlm_client_t *ui = mlm_client_new ();
-    mlm_client_connect (ui, endpoint, 1000, "UI");
-    
     mlm_client_t *cli = mlm_client_new ();
     mlm_client_connect (cli, endpoint, 1000, "CLI");
     
-    //Debigging
-    if(argc == 1)
-      send_test();
-    //  print_all(ui);
-    else 
-    //End debugging
       for (argn = 1; argn < argc; argn++) {
         if (streq (argv [argn], "--help")
         ||  streq (argv [argn], "-h")) {
@@ -150,11 +92,11 @@ int main (int argc, char *argv [])
         else 
         if (streq (argv [argn], "--list")
         ||  streq (argv [argn], "-l")){
-            list_devices(ui);
+            list_devices(cli);
             break;
         }
         else{
-            print_device(argv [argn], ui);
+            print_device(argv [argn], cli);
             break;
         }
     }
@@ -164,9 +106,29 @@ int main (int argc, char *argv [])
     
         zmsg_t *msg = reciver (cli, 1000);
         if (msg) {
-            char *reply = zmsg_popstr (msg);
-            printf ("%s", reply);
-            free (reply);
+            char *uuid = zmsg_popstr (msg);
+            char *confirmation = zmsg_popstr (msg);
+            char *command = zmsg_popstr (msg);
+            char *reply = NULL;
+            if(streq(command, "LIST")){
+                reply = zmsg_popstr (msg);
+                printf ("%s", reply);
+                free (reply);
+            }else{
+                printf("Device: %s\n", command);
+                zmsg_t *msg_part = zmsg_popmsg(msg);
+                bios_proto_t *bios_p_element;
+                while(msg_part){
+                  bios_p_element = bios_proto_decode(&msg_part);
+                  bios_proto_print(bios_p_element);
+                  bios_proto_destroy(&bios_p_element);
+                  msg_part = zmsg_popmsg(msg);
+                }
+            }
+            free (uuid);
+            free (confirmation);
+            free (command);
+            
             zmsg_destroy (&msg);
             zclock_sleep (100);
         }
@@ -174,6 +136,5 @@ int main (int argc, char *argv [])
             zsys_error ("No agent response");
     
     mlm_client_destroy(&cli);
-    mlm_client_destroy(&ui);
     return 0;
 }
