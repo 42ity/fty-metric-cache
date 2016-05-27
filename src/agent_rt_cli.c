@@ -31,46 +31,6 @@
 const char *endpoint = "ipc://@/malamute";
 zpoller_t *poller = NULL;
 
-void send_test(){
-    mlm_client_t *producer = mlm_client_new ();
-    mlm_client_connect (producer, endpoint, 1000, "PRODUCER");
-    mlm_client_set_producer (producer, "METRICS");
-    
-    zmsg_t *msg = bios_proto_encode_metric (NULL, "temperature", "ups", "30", "C", 15);
-    int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "temperature", "ups2", "20", "C", 25);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "ups", "30", "h", 5);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "ups2", "22", "h", 10);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "temperature", "pdu", "35", "C", 15);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "temperature", "pdu2", "10", "C", 25);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "pdu", "30", "h", 5);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    msg = bios_proto_encode_metric (NULL, "humidity", "pdu2", "20", "h", 10);
-    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
-    assert (rv == 0);
-    
-    mlm_client_destroy(&producer);
-}
-
 void print_device(const char *device, mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
@@ -115,12 +75,6 @@ int main (int argc, char *argv [])
     mlm_client_t *cli = mlm_client_new ();
     mlm_client_connect (cli, endpoint, 1000, "CLI");
     
-    //Debigging
-    if(argc == 1)
-      send_test();
-    //  print_all(ui);
-    else 
-    //End debugging
       for (argn = 1; argn < argc; argn++) {
         if (streq (argv [argn], "--help")
         ||  streq (argv [argn], "-h")) {
