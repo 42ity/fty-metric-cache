@@ -83,8 +83,8 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         zmsg_addstr (send, rt_get_list_devices(data));
         
         zstr_free (&command);
-        
-        int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+        printf("Sender: %s\n", mlm_client_sender(client));
+        int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
         assert (rv == 0);
         
     }else if(streq (command, "GET")){
@@ -118,8 +118,8 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
 
     zstr_free (&uuid);
     zstr_free (&element);
-    
-    int rv = mlm_client_sendto (client, "CLI", RFC_RT_DATA_SUBJECT, NULL, 5000, &reply);
+    printf("Sender: %s\n", mlm_client_sender(client));
+    int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &reply);
     
     if (rv != 0) {
         log_error (
@@ -142,7 +142,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
 
 //  --------------------------------------------------------------------------
 //  Self test of this class
-
+/*
 static bios_proto_t *
 test_metric_new (
         const char *type,
@@ -177,10 +177,10 @@ test_assert_proto (
     assert (streq (bios_proto_value (p), value));
     assert (bios_proto_ttl (p) == ttl);
 }
-
+*/
 void
 mailbox_test (bool verbose)
-{
+{/*
     static const char* endpoint = "inproc://bios-agent-rt-mailbox-test";
 
     printf (" * mailbox: ");
@@ -346,7 +346,7 @@ mailbox_test (bool verbose)
     mlm_client_destroy (&ui);
     mlm_client_destroy (&mailbox);
     zactor_destroy (&server);
-
+*/
     //  @end
     printf ("OK\n");
 }

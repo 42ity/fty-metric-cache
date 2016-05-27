@@ -71,22 +71,22 @@ void send_test(){
     mlm_client_destroy(&producer);
 }
 
-void print_device(const char *device, mlm_client_t *ui){
+void print_device(const char *device, mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
     zmsg_addstr (send, "GET");
     zmsg_addstr (send, device);
     
-    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
 
-void list_devices(mlm_client_t *ui){
+void list_devices(mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
     zmsg_addstr (send, "LIST");
     
-    int rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
 
@@ -111,9 +111,6 @@ int main (int argc, char *argv [])
 {
     bool verbose = false;
     int argn;
-    
-    mlm_client_t *ui = mlm_client_new ();
-    mlm_client_connect (ui, endpoint, 1000, "UI");
     
     mlm_client_t *cli = mlm_client_new ();
     mlm_client_connect (cli, endpoint, 1000, "CLI");
@@ -141,11 +138,11 @@ int main (int argc, char *argv [])
         else 
         if (streq (argv [argn], "--list")
         ||  streq (argv [argn], "-l")){
-            list_devices(ui);
+            list_devices(cli);
             break;
         }
         else{
-            print_device(argv [argn], ui);
+            print_device(argv [argn], cli);
             break;
         }
     }
@@ -185,6 +182,5 @@ int main (int argc, char *argv [])
             zsys_error ("No agent response");
     
     mlm_client_destroy(&cli);
-    mlm_client_destroy(&ui);
     return 0;
 }
