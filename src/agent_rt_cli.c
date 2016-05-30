@@ -27,6 +27,7 @@
 */
 
 #include "agent_rt_classes.h"
+#include <time.h>
 
 const char *endpoint = "ipc://@/malamute";
 zpoller_t *poller = NULL;
@@ -116,17 +117,20 @@ int main (int argc, char *argv [])
                 free (reply);
             }else{
                 printf("Device: %s\n", command);
+                char _bufftime[sizeof "YYYY-MM-DDTHH:MM:SSZ"];
                 zmsg_t *msg_part = zmsg_popmsg(msg);
                 bios_proto_t *bios_p_element;
                 while(msg_part){
                   bios_p_element = bios_proto_decode(&msg_part);
-                  printf("Device: %s - Element: %s  Timestamp: %" PRIu64"  Value: %s %s  Ttl: %" PRIu32" seconds\n",
-                    bios_proto_element_src (bios_p_element),
+                  uint64_t _time = bios_proto_aux_number (bios_p_element, "time", 0);
+                  strftime(_bufftime, sizeof _bufftime, "%FT%TZ", gmtime((const time_t*)&_time));
+                  printf("%s(ttl=%" PRIu32"s) %20s@%s = %s%s\n",
+                    _bufftime,
+                    bios_proto_ttl (bios_p_element),
                     bios_proto_type (bios_p_element),
-                    bios_proto_aux_number (bios_p_element, "time", 0),
+                    bios_proto_element_src (bios_p_element),
                     bios_proto_value (bios_p_element),
-                    bios_proto_unit (bios_p_element),
-                    bios_proto_ttl (bios_p_element));
+                    bios_proto_unit (bios_p_element));
                   bios_proto_destroy(&bios_p_element);
                   msg_part = zmsg_popmsg(msg);
                 }
