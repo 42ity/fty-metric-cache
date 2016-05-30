@@ -80,7 +80,7 @@ rt_put (rt_t *self, bios_proto_t **message_p)
     if (!message)
         return;
 
-    uint64_t timestamp = (uint64_t) zclock_mono ();
+    uint64_t timestamp = (uint64_t) zclock_time ()/1000;
     bios_proto_aux_insert (message, "time", "%" PRIu64, timestamp); 
 
     zhashx_t *device = (zhashx_t *) zhashx_lookup (self->devices, bios_proto_element_src (message));
