@@ -131,7 +131,7 @@ void
 rt_purge (rt_t *self)
 {
     assert (self);
-    uint64_t timestamp = (uint64_t) zclock_mono ();
+    uint64_t timestamp_s = (uint64_t) zclock_time () / 1000;
     zhashx_t *device = (zhashx_t *) zhashx_first (self->devices);
     while (device) {
         bios_proto_t *metric = (bios_proto_t *) zhashx_first (device);
@@ -141,8 +141,9 @@ rt_purge (rt_t *self)
         zlistx_set_duplicator (to_delete, (czmq_duplicator *) strdup);
 
         while (metric) { 
-            uint64_t time = bios_proto_aux_number (metric, "time", 0);
-            if (timestamp - time > bios_proto_ttl (metric) * 1000) {
+            uint64_t time_s = bios_proto_aux_number (metric, "time", 0);
+
+            if (timestamp_s - time_s > bios_proto_ttl (metric)) {
                 zlistx_add_end (to_delete, (void *) zhashx_cursor (device));
             }
             metric = (bios_proto_t *) zhashx_next (device);
@@ -511,8 +512,8 @@ rt_test (bool verbose)
     metric = test_metric_new ("load.input", "switch", "1000", "kV", 21);
     rt_put (self, &metric);
     
-    zsys_debug ("Sleeping 8500 ms");
-    zclock_sleep (8500);
+    zsys_debug ("Sleeping 9500 ms");
+    zclock_sleep (9500);
     rt_purge (self);
 
     // test 
