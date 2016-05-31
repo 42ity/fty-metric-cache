@@ -46,7 +46,7 @@ extern "C" {
  The RT-PROVIDER peer MUST respond with one of the following messages:
     
     3) uuid/OK/LIST/element_name^i
-    4) uuid/OK/GET/element/data^i
+    4) uuid/OK/element/data^i
 
     where
         * '/' indicates a multipart _frame_ message
