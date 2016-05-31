@@ -56,7 +56,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         zmsg_destroy (msg_p);
         log_warning (
                 "Bad message. Expected multipart string message `uuid/...`"
-                " - 'uuid' field missing. Sender: '%s', Subject: '%s'.",
+                " - 'uuid' field is missing. Sender: '%s', Subject: '%s'.",
                 mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
@@ -72,72 +72,65 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         return;
     }
      
-    char *element = NULL;
-    if (streq (command, "LIST")){
-    
+    if (streq (command, "LIST")) {
+
         zmsg_t *send = zmsg_new ();
         zmsg_addstr (send, uuid);
         zmsg_addstr (send, "OK");
         zmsg_addstr (send, command);
         zmsg_addstr (send, rt_get_list_devices(data));
-        
-        zstr_free (&command);
-        
+
         int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
         if ( rv != 0 ) {
-            log_error ("Cannot send a reply back");
+            log_error (
+                    "mlm_client_sendto (sender = '%s', subject = '%s', timeout = '5000') failed.",
+                    mlm_client_sender (client), RFC_RT_DATA_SUBJECT);
         }
-        return;
-    }
-    if(streq (command, "GET")){
-      zstr_free (&command);
-      // check element
-      element = zmsg_popstr (msg);
-      if (!element) {
-          zmsg_destroy (msg_p);
-          zstr_free (&uuid);
-          log_warning (
-                "Bad message. Expected multipart string message `uuid/GET/element`"
-                " - 'GET' missing or different string. Sender: '%s', Subject: '%s'.",
-                mlm_client_sender (client), mlm_client_subject (client));
-          return;
-      }
-      zmsg_t *reply = zmsg_new ();
-    zmsg_addstr (reply, uuid);
-    zmsg_addstr (reply, "OK");
-    zmsg_addstr (reply, element);
-
-    zhashx_t *hash = rt_get_element (data, element);
-    if (hash) { 
-        bios_proto_t *metric = (bios_proto_t *) zhashx_first (hash);
-        while (metric) {
-            bios_proto_t *copy = bios_proto_dup (metric);
-            zmsg_t *encoded = bios_proto_encode (&copy);
-            zmsg_addmsg (reply, &encoded);
-            metric = (bios_proto_t *) zhashx_next (hash);
+    } else if(streq (command, "GET")) {
+        // check element
+        char *element = zmsg_popstr (msg);
+        if (!element) {
+            zstr_free (&command);
+            zstr_free (&uuid);
+            zmsg_destroy (msg_p);
+            log_warning (
+                    "Bad message. Expected multipart string message `uuid/GET/element`"
+                    " - 'element' is missing. Sender: '%s', Subject: '%s'.",
+                    mlm_client_sender (client), mlm_client_subject (client));
+            return;
         }
-    }
+        zmsg_t *reply = zmsg_new ();
+        zmsg_addstr (reply, uuid);
+        zmsg_addstr (reply, "OK");
+        zmsg_addstr (reply, element);
 
-    zstr_free (&uuid);
-    zstr_free (&element);
-    
-    int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &reply);
-    
-    if (rv != 0) {
-        log_error (
-                "mlm_client_sendto (sender = '%s', subject = '%s', timeout = '5000') failed.",
-                mlm_client_sender (client), RFC_RT_DATA_SUBJECT);
-    }
-      
-    }else{
-        zmsg_destroy (msg_p);
-        zstr_free (&command);        
-        zstr_free (&uuid);
+        zhashx_t *hash = rt_get_element (data, element);
+        if (hash) { 
+            bios_proto_t *metric = (bios_proto_t *) zhashx_first (hash);
+            while (metric) {
+                bios_proto_t *copy = bios_proto_dup (metric);
+                zmsg_t *encoded = bios_proto_encode (&copy);
+                zmsg_addmsg (reply, &encoded);
+                metric = (bios_proto_t *) zhashx_next (hash);
+            }
+        }
+
+        zstr_free (&element);
+
+        int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &reply);
+
+        if (rv != 0) {
+            log_error (
+                    "mlm_client_sendto (sender = '%s', subject = '%s', timeout = '5000') failed.",
+                    mlm_client_sender (client), RFC_RT_DATA_SUBJECT);
+        }
+    } else {
         log_warning (
-                "Unrecognized command. Sender: '%s', Subject: '%s'.",
-                mlm_client_sender (client), mlm_client_subject (client));
-        return;
+                "Unrecognized command %s. Sender: '%s', Subject: '%s'.",
+                command, mlm_client_sender (client), mlm_client_subject (client));
     }
+    zstr_free (&uuid);
+    zstr_free (&command);        
     zmsg_destroy (msg_p);
     
 }
