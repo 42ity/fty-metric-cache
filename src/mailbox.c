@@ -55,27 +55,26 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
     if (!uuid) {
         zmsg_destroy (msg_p);
         log_warning (
-                "Bad message. Expected multipart string message `uuid/GET/element`"
+                "Bad message. Expected multipart string message `uuid/...`"
                 " - 'uuid' field missing. Sender: '%s', Subject: '%s'.",
                 mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
-    // check 'GET' command
-    char *element = NULL;
+    // check command
     char *command = zmsg_popstr (msg);
     if (!command) {
         zmsg_destroy (msg_p);
-        zstr_free (&command);        
         zstr_free (&uuid);
         log_warning (
-                "Bad message. Expected multipart string message `uuid/GET/element`"
-                " - 'GET' missing or different string. Sender: '%s', Subject: '%s'.",
+                "Bad message. Expected multipart string message `uuid/(GET|LIST)...`"
+                " - 'GET/LIST' string is missing. Sender: '%s', Subject: '%s'.",
                 mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
+     
+    char *element = NULL;
+    if (streq (command, "LIST")){
     
-      if (streq (command, "LIST")){
-        
         zmsg_t *send = zmsg_new ();
         zmsg_addstr (send, uuid);
         zmsg_addstr (send, "OK");
@@ -85,9 +84,12 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         zstr_free (&command);
         
         int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
-        assert (rv == 0);
-        
-    }else if(streq (command, "GET")){
+        if ( rv != 0 ) {
+            log_error ("Cannot send a reply back");
+        }
+        return;
+    }
+    if(streq (command, "GET")){
       zstr_free (&command);
       // check element
       element = zmsg_popstr (msg);
