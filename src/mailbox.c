@@ -105,12 +105,15 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         zmsg_addstr (reply, element);
 
         zhashx_t *hash = rt_get_element (data, element);
+        uint64_t now_s = time(NULL);
         if (hash) { 
             bios_proto_t *metric = (bios_proto_t *) zhashx_first (hash);
             while (metric) {
-                bios_proto_t *copy = bios_proto_dup (metric);
-                zmsg_t *encoded = bios_proto_encode (&copy);
-                zmsg_addmsg (reply, &encoded);
+                if ( bios_proto_aux_number(metric, "time", 0) + bios_proto_ttl(metric) > now_s ) {
+                    bios_proto_t *copy = bios_proto_dup (metric);
+                    zmsg_t *encoded = bios_proto_encode (&copy);
+                    zmsg_addmsg (reply, &encoded);
+                }
                 metric = (bios_proto_t *) zhashx_next (hash);
             }
         }
