@@ -1,21 +1,21 @@
 /*  =========================================================================
     bios_agent_rt_server - Actor listening on metrics with request reply protocol
 
-    Copyright (C) 2014 - 2015 Eaton                                        
-                                                                           
-    This program is free software; you can redistribute it and/or modify   
-    it under the terms of the GNU General Public License as published by   
-    the Free Software Foundation; either version 2 of the License, or      
-    (at your option) any later version.                                    
-                                                                           
-    This program is distributed in the hope that it will be useful,        
-    but WITHOUT ANY WARRANTY; without even the implied warranty of         
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          
-    GNU General Public License for more details.                           
-                                                                           
+    Copyright (C) 2014 - 2015 Eaton
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.            
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     =========================================================================
 */
 
@@ -63,7 +63,7 @@ s_handle_stream (mlm_client_t *client, zmsg_t **message_p, rt_t *data)
 {
     assert (client);
     assert (message_p && *message_p);
-   
+
     bios_proto_t *proto = bios_proto_decode (message_p);
     rt_put (data, &proto);
 }
@@ -126,7 +126,7 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
             continue;
         }
 
-        // paranoid non-destructive assertion of a twisted mind 
+        // paranoid non-destructive assertion of a twisted mind
         if (which != mlm_client_msgpipe (client)) {
             log_critical ("which was checked for NULL, pipe and now should have been `mlm_client_msgpipe (client)` but is not.");
             continue;
@@ -155,7 +155,7 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
         }
         zmsg_destroy (&message);
     } // while (!zsys_interrupted)
-    
+
     rt_save (data, fullpath);
     rt_destroy (&data);
     zstr_free (&fullpath);
@@ -190,7 +190,7 @@ bios_agent_rt_server_test (bool verbose)
 
     printf (" * bios_agent_rt_server: ");
     //  @selftest
-    
+
     zactor_t *server = zactor_new (mlm_server, (void*) "Malamute");
     zstr_sendx (server, "BIND", endpoint, NULL);
     if (verbose)
@@ -272,9 +272,9 @@ bios_agent_rt_server_test (bool verbose)
     proto = bios_proto_decode (&encoded);
     test_assert_proto (proto, "temperature", "ups", "30", "C", 5);
     bios_proto_destroy (&proto);
- 
+
     encoded = zmsg_popmsg (reply);
-    assert (encoded == NULL);   
+    assert (encoded == NULL);
 
     zmsg_destroy (&reply);
 
@@ -325,8 +325,8 @@ bios_agent_rt_server_test (bool verbose)
     bios_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
-    assert (encoded == NULL);   
-    
+    assert (encoded == NULL);
+
     zmsg_destroy (&reply);
 
     // ===============================================

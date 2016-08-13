@@ -1,21 +1,21 @@
 /*  =========================================================================
     agent_rt_cli - Command line interface for agent-rt
 
-    Copyright (C) 2014 - 2015 Eaton                                        
-                                                                           
-    This program is free software; you can redistribute it and/or modify   
-    it under the terms of the GNU General Public License as published by   
-    the Free Software Foundation; either version 2 of the License, or      
-    (at your option) any later version.                                    
-                                                                           
-    This program is distributed in the hope that it will be useful,        
-    but WITHOUT ANY WARRANTY; without even the implied warranty of         
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          
-    GNU General Public License for more details.                           
-                                                                           
+    Copyright (C) 2014 - 2015 Eaton
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.            
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     =========================================================================
 */
 
@@ -37,7 +37,7 @@ void print_device(const char *device, mlm_client_t *cli){
     zmsg_addstr (send, "");
     zmsg_addstr (send, "GET");
     zmsg_addstr (send, device);
-    
+
     int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
@@ -46,7 +46,7 @@ void list_devices(mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
     zmsg_addstr (send, "LIST");
-    
+
     int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
@@ -59,7 +59,7 @@ reciver (mlm_client_t *client, int timeout)
 
     if (!poller)
         poller = zpoller_new (mlm_client_msgpipe (client), NULL);
-    
+
     zsock_t *which = (zsock_t *) zpoller_wait (poller, timeout);
     if (which == mlm_client_msgpipe (client)) {
         zmsg_t *reply = mlm_client_recv (client);
@@ -72,10 +72,10 @@ int main (int argc, char *argv [])
 {
     bool verbose = false;
     int argn;
-    
+
     mlm_client_t *cli = mlm_client_new ();
     mlm_client_connect (cli, endpoint, 1000, "CLI");
-    
+
       for (argn = 1; argn < argc; argn++) {
         if (streq (argv [argn], "--help")
         ||  streq (argv [argn], "-h")) {
@@ -90,7 +90,7 @@ int main (int argc, char *argv [])
         if (streq (argv [argn], "--verbose")
         ||  streq (argv [argn], "-v"))
             verbose = true;
-        else 
+        else
         if (streq (argv [argn], "--list")
         ||  streq (argv [argn], "-l")){
             list_devices(cli);
@@ -101,10 +101,10 @@ int main (int argc, char *argv [])
             break;
         }
     }
-    
+
     if (verbose)
         zsys_info ("agent_rt_cli - Command line interface for agent-rt");
-    
+
         zmsg_t *msg = reciver (cli, 1000);
         if (msg) {
             char *uuid = zmsg_popstr (msg);
@@ -138,13 +138,13 @@ int main (int argc, char *argv [])
             free (uuid);
             free (confirmation);
             free (command);
-            
+
             zmsg_destroy (&msg);
             zclock_sleep (100);
         }
         else
             zsys_error ("No agent response");
-    
+
     mlm_client_destroy(&cli);
     return 0;
 }

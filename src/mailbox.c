@@ -1,21 +1,21 @@
 /*  =========================================================================
     mailbox - mailbox deliver
 
-    Copyright (C) 2014 - 2015 Eaton                                        
-                                                                           
-    This program is free software; you can redistribute it and/or modify   
-    it under the terms of the GNU General Public License as published by   
-    the Free Software Foundation; either version 2 of the License, or      
-    (at your option) any later version.                                    
-                                                                           
-    This program is distributed in the hope that it will be useful,        
-    but WITHOUT ANY WARRANTY; without even the implied warranty of         
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          
-    GNU General Public License for more details.                           
-                                                                           
+    Copyright (C) 2014 - 2015 Eaton
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.            
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     =========================================================================
 */
 
@@ -41,7 +41,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
     if (!*msg_p)
         return;
     zmsg_t *msg = *msg_p;
-    
+
     // check subject
     if (!streq (mlm_client_subject (client), RFC_RT_DATA_SUBJECT)) {
         zmsg_destroy (msg_p);
@@ -50,7 +50,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
-    // check uuid 
+    // check uuid
     char *uuid = zmsg_popstr (msg);
     if (!uuid) {
         zmsg_destroy (msg_p);
@@ -71,7 +71,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 mlm_client_sender (client), mlm_client_subject (client));
         return;
     }
-     
+
     if (streq (command, "LIST")) {
 
         zmsg_t *send = zmsg_new ();
@@ -106,7 +106,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
 
         zhashx_t *hash = rt_get_element (data, element);
         uint64_t now_s = time(NULL);
-        if (hash) { 
+        if (hash) {
             bios_proto_t *metric = (bios_proto_t *) zhashx_first (hash);
             while (metric) {
                 if ( bios_proto_aux_number(metric, "time", 0) + bios_proto_ttl(metric) > now_s ) {
@@ -133,9 +133,9 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 command, mlm_client_sender (client), mlm_client_subject (client));
     }
     zstr_free (&uuid);
-    zstr_free (&command);        
+    zstr_free (&command);
     zmsg_destroy (msg_p);
-    
+
 }
 //  --------------------------------------------------------------------------
 //  Self test of this class
@@ -182,7 +182,7 @@ mailbox_test (bool verbose)
 
     printf (" * mailbox: ");
     //  @selftest
- 
+
     // Malamute
     zactor_t *server = zactor_new (mlm_server, "Malamute");
     zstr_sendx (server, "BIND", endpoint, NULL);
@@ -241,12 +241,12 @@ mailbox_test (bool verbose)
     assert (command);
     assert (streq (command, "OK"));
     zstr_free (&command);
-    
+
     char *element = zmsg_popstr (reply);
     assert (element);
     assert (streq (element, "ups"));
     zstr_free (&element);
- 
+
     zmsg_t *encoded = zmsg_popmsg (reply);
     assert (encoded);
     bios_proto_t *proto = bios_proto_decode (&encoded);
@@ -265,7 +265,7 @@ mailbox_test (bool verbose)
     test_assert_proto (proto, "humidity", "ups", "40", "%", 200);
 
     bios_proto_destroy (&proto);
-    
+
     encoded = zmsg_popmsg (reply);
     assert (encoded == NULL);
     zmsg_destroy (&reply);
@@ -295,8 +295,8 @@ mailbox_test (bool verbose)
     assert (zpoller_expired (poller));
 
     zpoller_destroy (&poller);
-  
-    // End Test case #2   
+
+    // End Test case #2
 
     // ===============================================
     // Test case #3:
@@ -327,7 +327,7 @@ mailbox_test (bool verbose)
     assert (command);
     assert (streq (command, "OK"));
     zstr_free (&command);
-    
+
     element = zmsg_popstr (reply);
     assert (element);
     assert (streq (element, "non-existant-element"));
