@@ -1,21 +1,21 @@
 /*  =========================================================================
     rt - agent rt structure
 
-    Copyright (C) 2014 - 2015 Eaton                                        
-                                                                           
-    This program is free software; you can redistribute it and/or modify   
-    it under the terms of the GNU General Public License as published by   
-    the Free Software Foundation; either version 2 of the License, or      
-    (at your option) any later version.                                    
-                                                                           
-    This program is distributed in the hope that it will be useful,        
-    but WITHOUT ANY WARRANTY; without even the implied warranty of         
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          
-    GNU General Public License for more details.                           
-                                                                           
+    Copyright (C) 2014 - 2015 Eaton
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.            
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     =========================================================================
 */
 
@@ -60,7 +60,7 @@ rt_destroy (rt_t **self_p)
         rt_t *self = *self_p;
 
 	    zhashx_destroy (&self->devices);
-	
+
         free (self);
         *self_p = NULL;
     }
@@ -74,7 +74,7 @@ rt_put (rt_t *self, bios_proto_t **message_p)
 {
     assert (self);
     assert (message_p);
-    
+
     bios_proto_t *message = *message_p;
 
     if (!message)
@@ -123,7 +123,7 @@ rt_get_element (rt_t *self, const char *element)
 {
     assert (self);
     assert (element);
-  
+
     return (zhashx_t *) zhashx_lookup (self->devices, element);
 }
 
@@ -143,7 +143,7 @@ rt_purge (rt_t *self)
         zlistx_set_destructor (to_delete, (czmq_destructor *) zstr_free);
         zlistx_set_duplicator (to_delete, (czmq_duplicator *) strdup);
 
-        while (metric) { 
+        while (metric) {
             uint64_t time_s = bios_proto_aux_number (metric, "time", 0);
 
             if (timestamp_s - time_s > bios_proto_ttl (metric)) {
@@ -168,7 +168,7 @@ int
 rt_load (rt_t *self, const char *fullpath)
 {
     assert (self);
-    if (!fullpath) 
+    if (!fullpath)
         return 0;
 
     zfile_t *file = zfile_new (NULL, fullpath);
@@ -279,7 +279,7 @@ rt_save (rt_t *self, const char *fullpath)
         }
         device = (zhashx_t *) zhashx_next (self->devices);
     }
-    
+
     if (zchunk_write (chunk, zfile_handle (file)) == -1) {
         log_error ("zchunk_write () failed.");
     }
@@ -387,7 +387,7 @@ rt_test (bool verbose)
     printf (" * rt: \n");
 
     //  @selftest
-    
+
     rt_t *self = rt_new ();
     assert (self);
     rt_destroy (&self);
@@ -399,7 +399,7 @@ rt_test (bool verbose)
 
     // fill
     bios_proto_t *metric = test_metric_new ("temp", "ups", "15", "C", 20);
-    rt_put (self, &metric);    
+    rt_put (self, &metric);
 
     metric = test_metric_new ("humidity", "ups", "40", "%", 10);
     rt_put (self, &metric);
@@ -412,7 +412,7 @@ rt_test (bool verbose)
 
     metric = test_metric_new ("load.input", "switch", "134", "V", 20);
     rt_put (self, &metric);
-    
+
     metric = test_metric_new ("amperes", "switch", "50", "A", 30);
     rt_put (self, &metric);
 
@@ -425,13 +425,13 @@ rt_test (bool verbose)
 
     proto = rt_get (self, "ups", "humidity");
     test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
-    
+
     proto = rt_get (self, "epdu", "humidity");
     test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
 
     proto = rt_get (self, "switch", "load.input");
     test_assert_proto (proto, "load.input", "switch", "134", "V", 20);
-    
+
     proto = rt_get (self, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
 
@@ -453,13 +453,13 @@ rt_test (bool verbose)
 
     proto = rt_get (loaded, "ups", "humidity");
     test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
-    
+
     proto = rt_get (loaded, "epdu", "humidity");
     test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
 
     proto = rt_get (loaded, "switch", "load.input");
     test_assert_proto (proto, "load.input", "switch", "134", "V", 20);
-    
+
     proto = rt_get (loaded, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
     rt_destroy (&loaded);
@@ -495,31 +495,31 @@ rt_test (bool verbose)
 
     proto = rt_get (self, "ups", "humidity");
     test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
-    
+
     proto = rt_get (self, "epdu", "humidity");
     test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
 
     proto = rt_get (self, "switch", "load.input");
     test_assert_proto (proto, "load.input", "switch", "134", "V", 20);
-    
+
     proto = rt_get (self, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
 
     // change (ups, humidity) and test
     metric = test_metric_new ("humidity", "ups", "33", "%", 8);
-    rt_put (self, &metric);   
+    rt_put (self, &metric);
     proto = rt_get (self, "ups", "humidity");
     test_assert_proto (proto, "humidity", "ups", "33", "%", 8);
 
     // change (switch, load.input)
     metric = test_metric_new ("load.input", "switch", "1000", "kV", 21);
     rt_put (self, &metric);
-    
+
     zsys_debug ("Sleeping 9500 ms");
     zclock_sleep (9500);
     rt_purge (self);
 
-    // test 
+    // test
     proto = rt_get (self, "ups", "temp");
     test_assert_proto (proto, "temp", "ups", "15", "C", 20);
 
@@ -528,13 +528,13 @@ rt_test (bool verbose)
 
     proto = rt_get (self, "ups", "humidity");
     assert (proto == NULL);
-    
+
     proto = rt_get (self, "epdu", "humidity");
     test_assert_proto (proto, "humidity", "epdu", "21", "%", 10);
 
     proto = rt_get (self, "switch", "load.input");
     test_assert_proto (proto, "load.input", "switch", "1000", "kV", 21);
-    
+
     proto = rt_get (self, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
 
@@ -542,19 +542,19 @@ rt_test (bool verbose)
     zclock_sleep (12600);
     rt_purge (self);
 
-    // test 
+    // test
     proto = rt_get (self, "ups", "temp");
     assert (proto == NULL);
 
     proto = rt_get (self, "ups", "humidity");
     assert (proto == NULL);
-    
+
     proto = rt_get (self, "epdu", "humidity");
     assert (proto == NULL);
 
     proto = rt_get (self, "switch", "load.input");
     assert (proto == NULL);
-    
+
     proto = rt_get (self, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
 
@@ -562,19 +562,19 @@ rt_test (bool verbose)
     zclock_sleep (9000);
     rt_purge (self);
 
-    // test 
+    // test
     proto = rt_get (self, "ups", "temp");
     assert (proto == NULL);
 
     proto = rt_get (self, "ups", "humidity");
     assert (proto == NULL);
-    
+
     proto = rt_get (self, "epdu", "humidity");
     assert (proto == NULL);
 
     proto = rt_get (self, "switch", "load.input");
     assert (proto == NULL);
-    
+
     proto = rt_get (self, "switch", "amperes");
     assert (proto == NULL);
 
@@ -582,7 +582,7 @@ rt_test (bool verbose)
     rt_purge (self);
 
     rt_destroy (&self);
- 
+
     //  @end
     printf ("OK\n");
 }

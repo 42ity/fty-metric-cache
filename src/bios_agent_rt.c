@@ -1,21 +1,21 @@
 /*  =========================================================================
     bios_agent_rt - Listens on all metrics in order to remeber the last ones.
 
-    Copyright (C) 2014 - 2015 Eaton                                        
-                                                                           
-    This program is free software; you can redistribute it and/or modify   
-    it under the terms of the GNU General Public License as published by   
-    the Free Software Foundation; either version 2 of the License, or      
-    (at your option) any later version.                                    
-                                                                           
-    This program is distributed in the hope that it will be useful,        
-    but WITHOUT ANY WARRANTY; without even the implied warranty of         
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          
-    GNU General Public License for more details.                           
-                                                                           
+    Copyright (C) 2014 - 2015 Eaton
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.            
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     =========================================================================
 */
 
@@ -97,7 +97,7 @@ int main (int argc, char *argv [])
             }
             case 's':
             {
-                state_file = optarg; 
+                state_file = optarg;
                 break;
             }
             case 'h':
@@ -115,9 +115,9 @@ int main (int argc, char *argv [])
 
     // log_level cascade (priority ascending)
     //  1. default value
-    //  2. env. variable 
+    //  2. env. variable
     //  3. command line argument
-    //  4. actor message - NOT IMPLEMENTED YET 
+    //  4. actor message - NOT IMPLEMENTED YET
     if (log_level == -1) {
         char *env_log_level = getenv ("BIOS_LOG_LEVEL");
         if (env_log_level) {
