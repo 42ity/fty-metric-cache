@@ -70,20 +70,19 @@ reciver (mlm_client_t *client, int timeout)
 
 int main (int argc, char *argv [])
 {
+
+    mlm_client_t *client = mlm_client_new ();
+    mlm_client_connect (client, endpoint, 1000, "CLI");
+
     bool verbose = false;
-    int argn;
-
-    mlm_client_t *cli = mlm_client_new ();
-    mlm_client_connect (cli, endpoint, 1000, "CLI");
-
-    for (argn = 1; argn < argc; argn++) {
+    for (int argn = 1; argn < argc; argn++) {
         if (    streq (argv [argn], "--help")
              || streq (argv [argn], "-h"))
         {
             puts ("agent-rt-cli [options]");
-            puts ("agent-rt-cli [device]    print all information of the device");
-            puts ("  --list / -l            print list of devices in the agent");
-            puts ("  --verbose / -v         verbose test output");
+            puts ("agent-rt-cli [device]    print all information abot the device");
+            puts ("  --list / -l            print list of devices known to the agent");
+            puts ("  --verbose / -v         verbose output");
             puts ("  --help / -h            this information");
             break;
         }
@@ -97,11 +96,11 @@ int main (int argc, char *argv [])
         if (    streq (argv [argn], "--list")
              || streq (argv [argn], "-l"))
         {
-            list_devices(cli);
+            list_devices(client);
             break;
         }
         else {
-            print_device(argv [argn], cli);
+            print_device(argv [argn], client);
             break;
         }
     }
@@ -109,7 +108,7 @@ int main (int argc, char *argv [])
     if (verbose)
         zsys_info ("agent_rt_cli - Command line interface for agent-rt");
 
-    zmsg_t *msg = reciver (cli, 1000);
+    zmsg_t *msg = reciver (client, 1000);
     if (msg) {
         char *uuid = zmsg_popstr (msg);
         char *confirmation = zmsg_popstr (msg);
@@ -149,6 +148,6 @@ int main (int argc, char *argv [])
     else
         zsys_error ("No agent response");
 
-    mlm_client_destroy(&cli);
+    mlm_client_destroy (&client);
     return 0;
 }
