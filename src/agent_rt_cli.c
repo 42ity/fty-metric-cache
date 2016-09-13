@@ -74,14 +74,14 @@ int main (int argc, char *argv [])
     mlm_client_t *client = mlm_client_new ();
     if ( !client ) {
         zsys_error ("agent-rt-cli:\tlm_client_new memory error");
-        return;
+        return -1;
     }
 
     int rv = mlm_client_connect (client, endpoint, 1000, "CLI");
     if ( rv == -1 ) {
         zsys_error ("agent-rt-cli:\tCannot connect to malamute on '%s'", endpoint);
         mlm_client_destroy (&client);
-        return;
+        return -1;
     }
 
     bool verbose = false;
