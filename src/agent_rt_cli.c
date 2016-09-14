@@ -90,7 +90,7 @@ int main (int argc, char *argv [])
              || streq (argv [argn], "-h"))
         {
             puts ("agent-rt-cli [options]");
-            puts ("agent-rt-cli [device]    print all information abot the device");
+            puts ("agent-rt-cli [device]    print all information about the device");
             puts ("  --list / -l            print list of devices known to the agent");
             puts ("  --verbose / -v         verbose output");
             puts ("  --help / -h            this information");
