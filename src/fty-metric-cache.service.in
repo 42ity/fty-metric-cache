@@ -1,0 +1,11 @@
+[Unit]
+Description=fty-metric-cache service
+After=network.target
+
+[Service]
+Type=simple
+Environment="prefix=@prefix@"
+ExecStart=@prefix@/bin/fty-metric-cache @sysconfdir@/@PACKAGE@/fty-metric-cache.cfg
+
+[Install]
+WantedBy=multi-user.target

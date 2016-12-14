@@ -13,10 +13,10 @@ AM_CPPFLAGS = \
     ${libzmq_CFLAGS} \
     ${czmq_CFLAGS} \
     ${malamute_CFLAGS} \
-    ${biosproto_CFLAGS} \
+    ${libfty_proto_CFLAGS} \
     -I$(srcdir)/include
 
-project_libs = ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${biosproto_LIBS}
+project_libs = ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${libfty_proto_LIBS}
 
 SUBDIRS = doc
 DIST_SUBDIRS = doc
@@ -32,7 +32,7 @@ EXTRA_DIST = \
     src/actor_commands.h \
     src/rt.h \
     src/mailbox.h \
-    src/agent_rt_classes.h
+    src/fty_metric_cache_classes.h
 
 include $(srcdir)/src/Makemodule.am
 

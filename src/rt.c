@@ -1,5 +1,5 @@
 /*  =========================================================================
-    rt - agent rt structure
+    rt - fty metric cache structure
 
     Copyright (C) 2014 - 2015 Eaton
 
@@ -21,17 +21,17 @@
 
 /*
 @header
-    rt - agent rt structure
+    rt - fty metric cahce structure
 @discuss
 @end
 */
 
-#include "agent_rt_classes.h"
+#include "fty_metric_cache_classes.h"
 
 //  Structure of our class
 
 struct _rt_t {
-    zhashx_t *devices;      // hash of hashes ("device name", ("measurement", bios_proto_t*))
+    zhashx_t *devices;      // hash of hashes ("device name", ("measurement", fty_proto_t*))
 };
 
 //  --------------------------------------------------------------------------
@@ -67,42 +67,42 @@ rt_destroy (rt_t **self_p)
 }
 
 //  --------------------------------------------------------------------------
-//  Store bios_proto_t message transfering ownership
+//  Store fty_proto_t message transfering ownership
 
 void
-rt_put (rt_t *self, bios_proto_t **message_p)
+rt_put (rt_t *self, fty_proto_t **message_p)
 {
     assert (self);
     assert (message_p);
 
-    bios_proto_t *message = *message_p;
+    fty_proto_t *message = *message_p;
 
     if (!message)
         return;
 
-    if ( !bios_proto_aux_string (message, "time", NULL) ) {
+    if ( !fty_proto_aux_string (message, "time", NULL) ) {
         // If time not set, assign time = NOW()
         uint64_t timestamp_s = (uint64_t) zclock_time () / 1000;
-        bios_proto_aux_insert (message, "time", "%" PRIu64, timestamp_s);
+        fty_proto_aux_insert (message, "time", "%" PRIu64, timestamp_s);
     }
 
-    zhashx_t *device = (zhashx_t *) zhashx_lookup (self->devices, bios_proto_element_src (message));
+    zhashx_t *device = (zhashx_t *) zhashx_lookup (self->devices, fty_proto_element_src (message));
     if (!device) {
         zhashx_t *metrics = zhashx_new ();
-        zhashx_set_destructor (metrics, (zhashx_destructor_fn *) bios_proto_destroy);
+        zhashx_set_destructor (metrics, (zhashx_destructor_fn *) fty_proto_destroy);
 
-        int rv = zhashx_insert (self->devices, bios_proto_element_src (message), metrics);
+        int rv = zhashx_insert (self->devices, fty_proto_element_src (message), metrics);
         assert (rv == 0);
         device = metrics;
     }
-    zhashx_update (device, bios_proto_type (message), message);
+    zhashx_update (device, fty_proto_type (message), message);
     *message_p = NULL;
 }
 
 //  --------------------------------------------------------------------------
 //  Get specific measurement for given device or NULL when no data
 
-bios_proto_t *
+fty_proto_t *
 rt_get (rt_t *self, const char *element, const char *measurement)
 {
     assert (self);
@@ -112,7 +112,7 @@ rt_get (rt_t *self, const char *element, const char *measurement)
     zhashx_t *device = (zhashx_t *) zhashx_lookup (self->devices, element);
     if (!device)
         return NULL;
-    return (bios_proto_t *) zhashx_lookup (device, measurement);
+    return (fty_proto_t *) zhashx_lookup (device, measurement);
 }
 
 //  --------------------------------------------------------------------------
@@ -137,19 +137,19 @@ rt_purge (rt_t *self)
     uint64_t timestamp_s = (uint64_t) zclock_time () / 1000;
     zhashx_t *device = (zhashx_t *) zhashx_first (self->devices);
     while (device) {
-        bios_proto_t *metric = (bios_proto_t *) zhashx_first (device);
+        fty_proto_t *metric = (fty_proto_t *) zhashx_first (device);
 
         zlistx_t *to_delete = zlistx_new ();
         zlistx_set_destructor (to_delete, (czmq_destructor *) zstr_free);
         zlistx_set_duplicator (to_delete, (czmq_duplicator *) strdup);
 
         while (metric) {
-            uint64_t time_s = bios_proto_aux_number (metric, "time", 0);
+            uint64_t time_s = fty_proto_aux_number (metric, "time", 0);
 
-            if (timestamp_s - time_s > bios_proto_ttl (metric)) {
+            if (timestamp_s - time_s > fty_proto_ttl (metric)) {
                 zlistx_add_end (to_delete, (void *) zhashx_cursor (device));
             }
-            metric = (bios_proto_t *) zhashx_next (device);
+            metric = (fty_proto_t *) zhashx_next (device);
         }
         char *cursor = (char *) zlistx_first (to_delete);
         while (cursor) {
@@ -212,7 +212,7 @@ rt_load (rt_t *self, const char *fullpath)
 
         zmsg_t *zmessage = zmsg_decode (data, (size_t) *prefix);
         assert (zmessage);
-        bios_proto_t *metric = bios_proto_decode (&zmessage); // zmessage destroyed
+        fty_proto_t *metric = fty_proto_decode (&zmessage); // zmessage destroyed
         assert (metric);
 
         rt_put (self, &metric);
@@ -254,11 +254,11 @@ rt_save (rt_t *self, const char *fullpath)
     while (device) {
         log_debug ("%s", (const char *) zhashx_cursor (self->devices));
 
-        bios_proto_t *metric = (bios_proto_t *) zhashx_first (device);
+        fty_proto_t *metric = (fty_proto_t *) zhashx_first (device);
         while (metric) {
-            bios_proto_t *duplicate = bios_proto_dup (metric);
+            fty_proto_t *duplicate = fty_proto_dup (metric);
             assert (duplicate);
-            zmsg_t *zmessage = bios_proto_encode (&duplicate); // duplicate destroyed here
+            zmsg_t *zmessage = fty_proto_encode (&duplicate); // duplicate destroyed here
             assert (zmessage);
 
             byte *buffer = NULL;
@@ -275,7 +275,7 @@ rt_save (rt_t *self, const char *fullpath)
 
             free (buffer); buffer = NULL;
 
-            metric = (bios_proto_t *) zhashx_next (device);
+            metric = (fty_proto_t *) zhashx_next (device);
         }
         device = (zhashx_t *) zhashx_next (self->devices);
     }
@@ -300,17 +300,17 @@ rt_print (rt_t *self)
     while (device) {
         zsys_debug ("%s", (const char *) zhashx_cursor (self->devices));
 
-        bios_proto_t *metric = (bios_proto_t *) zhashx_first (device);
+        fty_proto_t *metric = (fty_proto_t *) zhashx_first (device);
         while (metric) {
             zsys_debug ("\t%s  -  %" PRIu64" %s %s %s %s %" PRIu32,
                     (const char *) zhashx_cursor (device),
-                    bios_proto_aux_number (metric, "time", 0),
-                    bios_proto_type (metric),
-                    bios_proto_element_src (metric),
-                    bios_proto_value (metric),
-                    bios_proto_unit (metric),
-                    bios_proto_ttl (metric));
-            metric = (bios_proto_t *) zhashx_next (device);
+                    fty_proto_aux_number (metric, "time", 0),
+                    fty_proto_type (metric),
+                    fty_proto_element_src (metric),
+                    fty_proto_value (metric),
+                    fty_proto_unit (metric),
+                    fty_proto_ttl (metric));
+            metric = (fty_proto_t *) zhashx_next (device);
         }
         device = (zhashx_t *) zhashx_next (self->devices);
     }
@@ -345,7 +345,7 @@ rt_get_list_devices (rt_t *self)
 //  --------------------------------------------------------------------------
 //  Self test of this class
 
-static bios_proto_t *
+static fty_proto_t *
 test_metric_new (
         const char *type,
         const char *element,
@@ -354,18 +354,18 @@ test_metric_new (
         uint32_t ttl
         )
 {
-    bios_proto_t *metric = bios_proto_new (BIOS_PROTO_METRIC);
-    bios_proto_set_type (metric, "%s", type);
-    bios_proto_set_element_src (metric, "%s", element);
-    bios_proto_set_unit (metric, "%s", unit);
-    bios_proto_set_value (metric, "%s", value);
-    bios_proto_set_ttl (metric, ttl);
+    fty_proto_t *metric = fty_proto_new (FTY_PROTO_METRIC);
+    fty_proto_set_type (metric, "%s", type);
+    fty_proto_set_element_src (metric, "%s", element);
+    fty_proto_set_unit (metric, "%s", unit);
+    fty_proto_set_value (metric, "%s", value);
+    fty_proto_set_ttl (metric, ttl);
     return metric;
 }
 
 static void
 test_assert_proto (
-        bios_proto_t *p,
+        fty_proto_t *p,
         const char *type,
         const char *element,
         const char *value,
@@ -373,11 +373,11 @@ test_assert_proto (
         uint32_t ttl)
 {
     assert (p);
-    assert (streq (bios_proto_type (p), type));
-    assert (streq (bios_proto_element_src (p), element));
-    assert (streq (bios_proto_unit (p), unit));
-    assert (streq (bios_proto_value (p), value));
-    assert (bios_proto_ttl (p) == ttl);
+    assert (streq (fty_proto_type (p), type));
+    assert (streq (fty_proto_element_src (p), element));
+    assert (streq (fty_proto_unit (p), unit));
+    assert (streq (fty_proto_value (p), value));
+    assert (fty_proto_ttl (p) == ttl);
 }
 
 
@@ -398,7 +398,7 @@ rt_test (bool verbose)
     self = rt_new ();
 
     // fill
-    bios_proto_t *metric = test_metric_new ("temp", "ups", "15", "C", 20);
+    fty_proto_t *metric = test_metric_new ("temp", "ups", "15", "C", 20);
     rt_put (self, &metric);
 
     metric = test_metric_new ("humidity", "ups", "40", "%", 10);
@@ -417,7 +417,7 @@ rt_test (bool verbose)
     rt_put (self, &metric);
 
     // test
-    bios_proto_t *proto = rt_get (self, "ups", "temp");
+    fty_proto_t *proto = rt_get (self, "ups", "temp");
     test_assert_proto (proto, "temp", "ups", "15", "C", 20);
 
     proto = rt_get (self, "ups", "ahoy");
@@ -471,15 +471,15 @@ rt_test (bool verbose)
     assert (r);
     assert (zhashx_size (r) == 3);
 
-    proto = (bios_proto_t *) zhashx_lookup (r, "temp");
+    proto = (fty_proto_t *) zhashx_lookup (r, "temp");
     assert (proto);
     test_assert_proto (proto, "temp", "ups", "15", "C", 20);
 
-    proto = (bios_proto_t *) zhashx_lookup (r, "ahoy");
+    proto = (fty_proto_t *) zhashx_lookup (r, "ahoy");
     assert (proto);
     test_assert_proto (proto, "ahoy", "ups", "90", "%", 8);
 
-    proto = (bios_proto_t *) zhashx_lookup (r, "humidity");
+    proto = (fty_proto_t *) zhashx_lookup (r, "humidity");
     assert (proto);
     test_assert_proto (proto, "humidity", "ups", "40", "%", 10);
 

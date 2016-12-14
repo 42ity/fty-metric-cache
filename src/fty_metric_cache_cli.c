@@ -1,5 +1,5 @@
 /*  =========================================================================
-    agent_rt_cli - Command line interface for agent-rt
+    fty_metric_cache_cli - Command line interface for agent-rt
 
     Copyright (C) 2014 - 2015 Eaton
 
@@ -21,12 +21,12 @@
 
 /*
 @header
-    agent_rt_cli - Command line interface for agent-rt
+     fty_metric_cache_cli - Command line interface for agent-rt
 @discuss
 @end
 */
 
-#include "agent_rt_classes.h"
+#include "fty_metric_cache_classes.h"
 #include <time.h>
 
 const char *endpoint = "ipc://@/malamute";
@@ -132,19 +132,19 @@ int main (int argc, char *argv [])
             printf("Device: %s\n", command);
             char _bufftime[sizeof "YYYY-MM-DDTHH:MM:SSZ"];
             zmsg_t *msg_part = zmsg_popmsg(msg);
-            bios_proto_t *bios_p_element;
+            fty_proto_t *fty_p_element;
             while(msg_part){
-                bios_p_element = bios_proto_decode(&msg_part);
-                uint64_t _time = bios_proto_aux_number (bios_p_element, "time", 0);
+                fty_p_element = fty_proto_decode(&msg_part);
+                uint64_t _time = fty_proto_aux_number (fty_p_element, "time", 0);
                 strftime(_bufftime, sizeof _bufftime, "%FT%TZ", gmtime((const time_t*)&_time));
                 printf("%s(ttl=%" PRIu32"s) %20s@%s = %s%s\n",
                         _bufftime,
-                        bios_proto_ttl (bios_p_element),
-                        bios_proto_type (bios_p_element),
-                        bios_proto_element_src (bios_p_element),
-                        bios_proto_value (bios_p_element),
-                        bios_proto_unit (bios_p_element));
-                bios_proto_destroy(&bios_p_element);
+                        fty_proto_ttl (fty_p_element),
+                        fty_proto_type (fty_p_element),
+                        fty_proto_element_src (fty_p_element),
+                        fty_proto_value (fty_p_element),
+                        fty_proto_unit (fty_p_element));
+                fty_proto_destroy(&fty_p_element);
                 msg_part = zmsg_popmsg(msg);
             }
         }

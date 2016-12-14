@@ -8,13 +8,13 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libagent_rt
+Name: libfty_metric_cache
 Description: Knows current values of any METRIC in the system
 Version: @VERSION@
 
-Requires:libzmq libczmq libmlm libbiosproto
+Requires:libzmq libczmq >= 3.0.0 libmlm >= 1.0.0 libfty_proto
 
-Libs: -L${libdir} -lagent_rt
+Libs: -L${libdir} -lfty_metric_cache
 Cflags: -I${includedir} @pkg_config_defines@
 
 ################################################################################

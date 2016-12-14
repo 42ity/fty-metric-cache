@@ -1,42 +1,41 @@
 <project
-    name = "agent-rt"
+    name = "fty-metric-cache"
     description = "Knows current values of any METRIC in the system"
     script = "zproject.gsl"
-    email = "bios@eaton.com"
-    url = "https://eaton.com/"
-    license = "GPL-2.0+"
+    email = "EatonIPCOpenSource@eaton.com"
+    repository = "https://github.com/42ity/fty-metric-cache" 
+    abi = "1:0:0"
     >
 
     <target name = "debian" />
     <target name = "redhat" />
+    <target name = "travis" />
 
     <include filename = "license.xml" />
-    <version major = "0" minor = "1" patch = "0" />
+    <version major = "1" minor = "0" patch = "0" />
+    <use project = "czmq" min_major = "3" />
+    <use project = "malamute" min_major = "1" />
 
-
-    <use project = "malamute" />
-
-    <use project = "biosproto" libname = "libbiosproto" prefix="biosproto"
+    <use project = "fty-proto" libname = "libfty_proto" prefix="ftyproto"
         min_major = "0" min_minor = "0" min_patch = "0"
-        repository = "https://stash.mbt.lab.etn.com/BIOS/libbiosproto"
-        test = "bios_proto_test">
+        repository = "https://github.com/42ity/fty-proto"
+        test = "fty_proto_test">
         <use project = "malamute"/>
     </use>
 
-    <class name = "logger"          private = "1">logging api</class>
-    <class name = "actor commands"  private = "1">actor commands</class>
-    <class name = "rt"              private = "1">agent rt structure</class>
-    <class name = "mailbox"         private = "1">mailbox deliver</class>
+    <class name = "logger"          private = "1">Logging api</class>
+    <class name = "actor commands"  private = "1">Actor commands</class>
+    <class name = "rt"              private = "1">Metric cache structure</class>
+    <class name = "mailbox"         private = "1">Mailbox deliver</class>
 
-    <class name = "bios-agent-rt-server" state = "stable">
+    <class name = "fty-metric-cache-server" state = "stable">
         Actor listening on metrics with request reply protocol
     </class>
 
-    <main name = "bios-agent-rt" service = "1" no_config = "1">
+    <main name = "fty-metric-cache" service = "1" no_config = "1">
         Listens on all metrics in order to remeber the last ones.
     </main>
-    <main name = "agent-rt-cli">
-        Command line interface for agent-rt
+    <main name = "fty-metric-cache-cli">
+        Command line interface for fty-metric-cache
     </main>
-
 </project>

@@ -51,7 +51,7 @@ extern "C" {
 // Performs the actor commands logic
 // Destroys the message
 // Returns 1 for $TERM (means exit), 0 otherwise
-AGENT_RT_EXPORT int
+FTY_METRIC_CACHE_EXPORT int
     actor_commands (
             mlm_client_t *client,
             zmsg_t **message_p,
@@ -59,7 +59,7 @@ AGENT_RT_EXPORT int
             char **fullpath);
 
 //  Self test of this class
-AGENT_RT_EXPORT void
+FTY_METRIC_CACHE_EXPORT void
     actor_commands_test (bool verbose);
 
 //  @end

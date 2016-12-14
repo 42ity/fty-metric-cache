@@ -28,7 +28,7 @@
 
 #include <errno.h>
 
-#include "agent_rt_classes.h"
+#include "fty_metric_cache_classes.h"
 
 #define ASSERT_LEVEL \
     assert(level == LOG_DEBUG   || \

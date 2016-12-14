@@ -1,5 +1,5 @@
 /*  =========================================================================
-    bios_agent_rt_server - Actor listening on metrics with request reply protocol
+    fty_metric_cache_server - Actor listening on metrics with request reply protocol
 
     Copyright (C) 2014 - 2015 Eaton
 
@@ -21,12 +21,12 @@
 
 /*
 @header
-    bios_agent_rt_server - Actor listening on metrics with request reply protocol
+    fty_metric_cache_server - Actor listening on metrics with request reply protocol
 @discuss
 @end
 */
 
-#include "agent_rt_classes.h"
+#include "fty_metric_cache_classes.h"
 
 #define POLL_INTERVAL 30000
 
@@ -64,12 +64,12 @@ s_handle_stream (mlm_client_t *client, zmsg_t **message_p, rt_t *data)
     assert (client);
     assert (message_p && *message_p);
 
-    bios_proto_t *proto = bios_proto_decode (message_p);
+    fty_proto_t *proto = fty_proto_decode (message_p);
     rt_put (data, &proto);
 }
 
 void
-bios_agent_rt_server (zsock_t *pipe, void *args)
+fty_metric_cache_server (zsock_t *pipe, void *args)
 {
 
     mlm_client_t *client = mlm_client_new ();
@@ -168,7 +168,7 @@ bios_agent_rt_server (zsock_t *pipe, void *args)
 
 static void
 test_assert_proto (
-        bios_proto_t *p,
+        fty_proto_t *p,
         const char *type,
         const char *element,
         const char *value,
@@ -176,19 +176,19 @@ test_assert_proto (
         uint32_t ttl)
 {
     assert (p);
-    assert (streq (bios_proto_type (p), type));
-    assert (streq (bios_proto_element_src (p), element));
-    assert (streq (bios_proto_unit (p), unit));
-    assert (streq (bios_proto_value (p), value));
-    assert (bios_proto_ttl (p) == ttl);
+    assert (streq (fty_proto_type (p), type));
+    assert (streq (fty_proto_element_src (p), element));
+    assert (streq (fty_proto_unit (p), unit));
+    assert (streq (fty_proto_value (p), value));
+    assert (fty_proto_ttl (p) == ttl);
 }
 
 void
-bios_agent_rt_server_test (bool verbose)
+fty_metric_cache_server_test (bool verbose)
 {
-    static const char* endpoint = "inproc://bios-agent-rt-server-test";
+    static const char* endpoint = "inproc://fty-metric-cache-server-test";
 
-    printf (" * bios_agent_rt_server: ");
+    printf (" * fty_metric_cache_server: ");
     //  @selftest
 
     zactor_t *server = zactor_new (mlm_server, (void*) "Malamute");
@@ -203,27 +203,27 @@ bios_agent_rt_server_test (bool verbose)
     mlm_client_t *ui = mlm_client_new ();
     mlm_client_connect (ui, endpoint, 1000, "UI");
 
-    zactor_t *rt = zactor_new (bios_agent_rt_server, (void*) NULL);
+    zactor_t *rt = zactor_new (fty_metric_cache_server, (void*) NULL);
     zstr_sendx (rt, "CONNECT", endpoint, "agent-rt", NULL);
     zstr_sendx (rt, "CONSUMER", "METRICS", ".*", NULL);
     zclock_sleep (100);
 
-    zmsg_t *msg = bios_proto_encode_metric (NULL, "temperature", "ups", "30", "C", 5);
+    zmsg_t *msg = fty_proto_encode_metric (NULL, "temperature", "ups", "30", "C", 5);
     int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = bios_proto_encode_metric (NULL, "humidity", "ups", "45", "%", 5);
+    msg = fty_proto_encode_metric (NULL, "humidity", "ups", "45", "%", 5);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = bios_proto_encode_metric (NULL, "temperature", "epdu", "25", "C", 60);
+    msg = fty_proto_encode_metric (NULL, "temperature", "epdu", "25", "C", 60);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = bios_proto_encode_metric (NULL, "realpower.default", "switch", "100", "W", 55);
+    msg = fty_proto_encode_metric (NULL, "realpower.default", "switch", "100", "W", 55);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
@@ -263,15 +263,15 @@ bios_agent_rt_server_test (bool verbose)
     zmsg_t *encoded = zmsg_popmsg (reply);
     assert (encoded);
 
-    bios_proto_t *proto = bios_proto_decode (&encoded);
+    fty_proto_t *proto = fty_proto_decode (&encoded);
     test_assert_proto (proto, "humidity", "ups", "45", "%", 5);
-    bios_proto_destroy (&proto);
+    fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
     assert (encoded);
-    proto = bios_proto_decode (&encoded);
+    proto = fty_proto_decode (&encoded);
     test_assert_proto (proto, "temperature", "ups", "30", "C", 5);
-    bios_proto_destroy (&proto);
+    fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
     assert (encoded == NULL);
@@ -286,7 +286,7 @@ bios_agent_rt_server_test (bool verbose)
     //      1 changed measurement
     // ===============================================
 
-    msg = bios_proto_encode_metric (NULL, "temperature", "epdu", "70", "C", 29);
+    msg = fty_proto_encode_metric (NULL, "temperature", "epdu", "70", "C", 29);
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (10);
@@ -320,9 +320,9 @@ bios_agent_rt_server_test (bool verbose)
     encoded = zmsg_popmsg (reply);
     assert (encoded);
 
-    proto = bios_proto_decode (&encoded);
+    proto = fty_proto_decode (&encoded);
     test_assert_proto (proto, "temperature", "epdu", "70", "C", 29);
-    bios_proto_destroy (&proto);
+    fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
     assert (encoded == NULL);

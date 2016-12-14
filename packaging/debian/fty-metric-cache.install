@@ -1,0 +1,3 @@
+usr/bin/fty-metric-cache
+usr/bin/fty-metric-cache-cli
+usr/lib/systemd/system/fty-metric-cache*.service

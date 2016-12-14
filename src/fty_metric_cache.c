@@ -1,5 +1,5 @@
 /*  =========================================================================
-    bios_agent_rt - Listens on all metrics in order to remeber the last ones.
+    fty_metric_cache - Listens on all metrics in order to remeber the last ones.
 
     Copyright (C) 2014 - 2015 Eaton
 
@@ -21,24 +21,24 @@
 
 /*
 @header
-    bios_agent_rt - Listens on all metrics in order to remeber the last ones.
+    fty_metric_cache - Listens on all metrics in order to remeber the last ones.
 @discuss
 @end
 */
 #include <getopt.h>
 
-#include "agent_rt_classes.h"
+#include "fty_metric_cache_classes.h"
 
 #define str(x) #x
 
-static const char *AGENT_NAME = "agent-rt";
+static const char *AGENT_NAME = "fty-metric-cache";
 static const char *ENDPOINT = "ipc://@/malamute";
-static const char *STATE_FILE = "/var/lib/bios/bios-agent-rt/state_file";
+static const char *STATE_FILE = "/var/lib/bios/fty-metric-cache/state_file";
 
 #define DEFAULT_LOG_LEVEL LOG_WARNING
 
 void usage () {
-    puts ("bios-agent-rt [options] ...\n"
+    puts ("fty-metric-cache [options] ...\n"
           "  --log-level / -l       bios log level\n"
           "                         overrides setting in env. variable BIOS_LOG_LEVEL\n"
           "  --state-file / -s      TODO\n"
@@ -136,14 +136,14 @@ int main (int argc, char *argv [])
         state_file = (char *) STATE_FILE;
     }
 
-    zactor_t *rt_server = zactor_new (bios_agent_rt_server, (void *) NULL);
+    zactor_t *rt_server = zactor_new (fty_metric_cache_server, (void *) NULL);
     if (!rt_server) {
-        log_critical ("zactor_new (task = 'bios_agent_rt_server', args = 'NULL') failed");
+        log_critical ("zactor_new (task = 'fty_metric_cache_server', args = 'NULL') failed");
         return EXIT_FAILURE;
     }
     zstr_sendx (rt_server,  "CONFIGURE", state_file, NULL);
     zstr_sendx (rt_server,  "CONNECT", ENDPOINT, AGENT_NAME, NULL);
-    zstr_sendx (rt_server,  "CONSUMER", BIOS_PROTO_STREAM_METRICS, ".*", NULL);
+    zstr_sendx (rt_server,  "CONSUMER", FTY_PROTO_STREAM_METRICS, ".*", NULL);
 
     while (true) {
         char *message = zstr_recv (rt_server);
