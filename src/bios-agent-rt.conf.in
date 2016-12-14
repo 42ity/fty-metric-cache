@@ -1,3 +1,0 @@
-# create runtime directories for bios-agent-rt
-d /var/lib/bios/bios-agent-rt 0755 bios root
-x /var/lib/bios/bios-agent-rt/*

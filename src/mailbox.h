@@ -67,11 +67,11 @@ extern "C" {
 #define RFC_RT_DATA_SUBJECT "latest-rt-data"
 
 //  Perform mailbox deliver protocol
-AGENT_RT_EXPORT void
+FTY_METRIC_CACHE_EXPORT void
     mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data);
 
 //  Self test of this class
-AGENT_RT_EXPORT void
+FTY_METRIC_CACHE_EXPORT void
     mailbox_test (bool verbose);
 
 //  @end

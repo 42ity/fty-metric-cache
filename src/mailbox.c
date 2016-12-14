@@ -26,7 +26,7 @@
 @end
 */
 
-#include "agent_rt_classes.h"
+#include "fty_metric_cache_classes.h"
 
 #define ENDPOINT "ipc://@/malamute"
 //  --------------------------------------------------------------------------
@@ -107,14 +107,14 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         zhashx_t *hash = rt_get_element (data, element);
         uint64_t now_s = time(NULL);
         if (hash) {
-            bios_proto_t *metric = (bios_proto_t *) zhashx_first (hash);
+            fty_proto_t *metric = (fty_proto_t *) zhashx_first (hash);
             while (metric) {
-                if ( bios_proto_aux_number(metric, "time", 0) + bios_proto_ttl(metric) > now_s ) {
-                    bios_proto_t *copy = bios_proto_dup (metric);
-                    zmsg_t *encoded = bios_proto_encode (&copy);
+                if ( fty_proto_aux_number(metric, "time", 0) + fty_proto_ttl(metric) > now_s ) {
+                    fty_proto_t *copy = fty_proto_dup (metric);
+                    zmsg_t *encoded = fty_proto_encode (&copy);
                     zmsg_addmsg (reply, &encoded);
                 }
-                metric = (bios_proto_t *) zhashx_next (hash);
+                metric = (fty_proto_t *) zhashx_next (hash);
             }
         }
 
@@ -140,7 +140,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
 //  --------------------------------------------------------------------------
 //  Self test of this class
 
-static bios_proto_t *
+static fty_proto_t *
 test_metric_new (
         const char *type,
         const char *element,
@@ -149,18 +149,18 @@ test_metric_new (
         uint32_t ttl
         )
 {
-    bios_proto_t *metric = bios_proto_new (BIOS_PROTO_METRIC);
-    bios_proto_set_type (metric, "%s", type);
-    bios_proto_set_element_src (metric, "%s", element);
-    bios_proto_set_unit (metric, "%s", unit);
-    bios_proto_set_value (metric, "%s", value);
-    bios_proto_set_ttl (metric, ttl);
+    fty_proto_t *metric = fty_proto_new (FTY_PROTO_METRIC);
+    fty_proto_set_type (metric, "%s", type);
+    fty_proto_set_element_src (metric, "%s", element);
+    fty_proto_set_unit (metric, "%s", unit);
+    fty_proto_set_value (metric, "%s", value);
+    fty_proto_set_ttl (metric, ttl);
     return metric;
 }
 
 static void
 test_assert_proto (
-        bios_proto_t *p,
+        fty_proto_t *p,
         const char *type,
         const char *element,
         const char *value,
@@ -168,17 +168,17 @@ test_assert_proto (
         uint32_t ttl)
 {
     assert (p);
-    assert (streq (bios_proto_type (p), type));
-    assert (streq (bios_proto_element_src (p), element));
-    assert (streq (bios_proto_unit (p), unit));
-    assert (streq (bios_proto_value (p), value));
-    assert (bios_proto_ttl (p) == ttl);
+    assert (streq (fty_proto_type (p), type));
+    assert (streq (fty_proto_element_src (p), element));
+    assert (streq (fty_proto_unit (p), unit));
+    assert (streq (fty_proto_value (p), value));
+    assert (fty_proto_ttl (p) == ttl);
 }
 
 void
 mailbox_test (bool verbose)
 {
-    static const char* endpoint = "inproc://bios-agent-rt-mailbox-test";
+    static const char* endpoint = "inproc://fty-metric-cache-mailbox-test";
 
     printf (" * mailbox: ");
     //  @selftest
@@ -199,7 +199,7 @@ mailbox_test (bool verbose)
 
     // data, fill
     rt_t *data = rt_new ();
-    bios_proto_t *metric = test_metric_new ("temp", "ups", "15", "C", 100);
+    fty_proto_t *metric = test_metric_new ("temp", "ups", "15", "C", 100);
     rt_put (data, &metric);
     metric = test_metric_new ("humidity", "ups", "40", "%", 200);
     rt_put (data, &metric);
@@ -249,22 +249,22 @@ mailbox_test (bool verbose)
 
     zmsg_t *encoded = zmsg_popmsg (reply);
     assert (encoded);
-    bios_proto_t *proto = bios_proto_decode (&encoded);
+    fty_proto_t *proto = fty_proto_decode (&encoded);
     test_assert_proto (proto, "battery.remaining", "ups", "20", "%", 200);
-    bios_proto_destroy (&proto);
+    fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
     assert (encoded);
-    proto = bios_proto_decode (&encoded);
+    proto = fty_proto_decode (&encoded);
     test_assert_proto (proto, "temp", "ups", "15", "C", 100);
-    bios_proto_destroy (&proto);
+    fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
     assert (encoded);
-    proto = bios_proto_decode (&encoded);
+    proto = fty_proto_decode (&encoded);
     test_assert_proto (proto, "humidity", "ups", "40", "%", 200);
 
-    bios_proto_destroy (&proto);
+    fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
     assert (encoded == NULL);

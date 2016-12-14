@@ -1,3 +1,0 @@
-usr/include/*
-usr/lib/*/libagent_rt.so
-usr/lib/*/pkgconfig/libagent_rt.pc

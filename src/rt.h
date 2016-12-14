@@ -1,5 +1,5 @@
 /*  =========================================================================
-    rt - agent rt structure
+    rt - Metric cache structure
 
     Copyright (C) 2014 - 2015 Eaton
 
@@ -30,56 +30,56 @@ typedef struct _rt_t rt_t;
 
 //  @interface
 //  Create a new rt
-AGENT_RT_EXPORT rt_t *
+FTY_METRIC_CACHE_EXPORT rt_t *
     rt_new (void);
 
-//  Store bios_proto_t message transfering ownership
-AGENT_RT_EXPORT void
-    rt_put (rt_t *self, bios_proto_t **message);
+//  Store fty_proto_t message transfering ownership
+FTY_METRIC_CACHE_EXPORT void
+    rt_put (rt_t *self, fty_proto_t **message);
 
 //  Get specific measurement for given element or NULL when no data
 //  Does not transfer ownership
-AGENT_RT_EXPORT bios_proto_t *
+FTY_METRIC_CACHE_EXPORT fty_proto_t *
     rt_get (rt_t *self, const char *element, const char *measurement);
 
 //  Get all measurements for given element or NULL when no data
 //  Does not transfer ownership
-AGENT_RT_EXPORT zhashx_t *
+FTY_METRIC_CACHE_EXPORT zhashx_t *
     rt_get_element (rt_t *self, const char *element);
 
 //  Purge expired data
-AGENT_RT_EXPORT void
+FTY_METRIC_CACHE_EXPORT void
     rt_purge (rt_t *self);
 
 //  Load rt from disk
 //  If 'fullpath' is NULL does nothing
 //  0 - success, -1 - error
-AGENT_RT_EXPORT int
+FTY_METRIC_CACHE_EXPORT int
     rt_load (rt_t *self, const char *fullpath);
 
 //  Save rt to disk
 //  If 'fullpath' is NULL does nothing
 //  0 - success, -1 - error
-AGENT_RT_EXPORT int
+FTY_METRIC_CACHE_EXPORT int
     rt_save (rt_t *self, const char *fullpath);
 
 //  Print
-AGENT_RT_EXPORT void
+FTY_METRIC_CACHE_EXPORT void
     rt_print (rt_t *self);
 
 //  Print list devices
-AGENT_RT_EXPORT char *
+FTY_METRIC_CACHE_EXPORT char *
     rt_get_list_devices  (rt_t *self);
 
 //  Print info of device
-AGENT_RT_EXPORT char *
+FTY_METRIC_CACHE_EXPORT char *
     rt_get_device_info (const char *name, rt_t *self);
 //  Destroy the rt
-AGENT_RT_EXPORT void
+FTY_METRIC_CACHE_EXPORT void
     rt_destroy (rt_t **self_p);
 
 //  Self test of this class
-AGENT_RT_EXPORT void
+FTY_METRIC_CACHE_EXPORT void
     rt_test (bool verbose);
 
 //  @end
