@@ -1,4 +1,5 @@
 save.xml
+stderr.txt
 # Object files
 *.o
 *.so
@@ -88,8 +89,9 @@ build/
 *~
 
 # configuration files, as they are not used here and the flag in project.xml is broken
-src/bios-agent-rt.cfg.in
-src/bios-agent-rt.cfg
+src/fty-metric-cache.cfg.in
+src/fty-metric-cache.cfg
 
 # Some automatically generated files for builds that are not used
 *.cmake
+test_state_file
