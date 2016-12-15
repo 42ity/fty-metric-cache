@@ -1,11 +1,21 @@
 [Unit]
 Description=fty-metric-cache service
-After=network.target
+Requires=malamute.service
+After=malamute.service
+PartOf=bios.target
 
 [Service]
 Type=simple
+User=bios
 Environment="prefix=@prefix@"
-ExecStart=@prefix@/bin/fty-metric-cache @sysconfdir@/@PACKAGE@/fty-metric-cache.cfg
+EnvironmentFile=-/usr/share/bios/etc/default/bios
+EnvironmentFile=-/usr/share/bios/etc/default/bios__%n.conf
+EnvironmentFile=-/etc/default/bios
+EnvironmentFile=-/etc/default/bios__%n.conf
+ExecStart=@prefix@/bin/fty-metric-cache
+Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=bios.target
+
+
