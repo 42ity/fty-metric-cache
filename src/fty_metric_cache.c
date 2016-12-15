@@ -33,7 +33,7 @@
 
 static const char *AGENT_NAME = "fty-metric-cache";
 static const char *ENDPOINT = "ipc://@/malamute";
-static const char *STATE_FILE = "/var/lib/bios/fty-metric-cache/state_file";
+static const char *STATE_FILE = "/var/lib/bios/bios-agent-rt/state_file";
 
 #define DEFAULT_LOG_LEVEL LOG_WARNING
 
