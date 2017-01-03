@@ -53,5 +53,6 @@ before_script:
 script: ./ci_build.sh
 
 after_failure:
-- COREFILE=$(find . -maxdepth 1 -name "core*" | head -n 1) # find core file
+- COREFILE=$(find . -maxdepth 10 -name "core*" | head -n 1) # find core file ?
+- echo $COREFILE
 - if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" example -ex "thread apply all bt" -ex "set pagination 0" -batch; fi
