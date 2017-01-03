@@ -36,7 +36,7 @@ if [ "$BUILD_TYPE" == "default" ]; then
     make -j4
     make install
     cd ..
-    git clone --quiet --depth 1 https://github.com/zeromq/czmq czmq
+    git clone --quiet --depth 1 -b v3.0.2 https://github.com/zeromq/czmq czmq
     cd czmq
     git --no-pager log --oneline -n1
     if [ -e autogen.sh ]; then
@@ -62,8 +62,8 @@ if [ "$BUILD_TYPE" == "default" ]; then
     make -j4
     make install
     cd ..
-    git clone --quiet --depth 1 https://github.com/42ity/fty-proto libfty_proto
-    cd libfty_proto
+    git clone --quiet --depth 1 https://github.com/42ity/fty-proto fty-proto
+    cd fty-proto
     git --no-pager log --oneline -n1
     if [ -e autogen.sh ]; then
         ./autogen.sh 2> /dev/null

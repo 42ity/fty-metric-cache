@@ -13,10 +13,10 @@ AM_CPPFLAGS = \
     ${libzmq_CFLAGS} \
     ${czmq_CFLAGS} \
     ${malamute_CFLAGS} \
-    ${libfty_proto_CFLAGS} \
+    ${fty_proto_CFLAGS} \
     -I$(srcdir)/include
 
-project_libs = ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${libfty_proto_LIBS}
+project_libs = ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${fty_proto_LIBS}
 
 SUBDIRS = doc
 DIST_SUBDIRS = doc
