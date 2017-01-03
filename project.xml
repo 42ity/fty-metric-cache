@@ -4,6 +4,7 @@
     script = "zproject.gsl"
     email = "EatonIPCOpenSource@eaton.com"
     repository = "https://github.com/42ity/fty-metric-cache" 
+    license = "GPL-2.0+"
     abi = "1:0:0"
     >
 
@@ -13,7 +14,8 @@
 
     <include filename = "license.xml" />
     <version major = "1" minor = "0" patch = "0" />
-    <use project = "czmq" release = "v3.0.2"/>
+    <use project = "czmq" release = "v3.0.2" 
+	 repository="https://github.com/42ity/czmq.git"/>
     <use project = "malamute" min_major = "1" />
 
     <use project = "fty-proto" libname = "libfty_proto" prefix="ftyproto"

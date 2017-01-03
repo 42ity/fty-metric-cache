@@ -22,7 +22,7 @@ Name:           fty-metric-cache
 Version:        1.0.0
 Release:        1
 Summary:        knows current values of any metric in the system
-License:        MIT
+License:        GPL-2.0+
 URL:            http://example.com/
 Source0:        %{name}-%{version}.tar.gz
 Group:          System/Libraries
