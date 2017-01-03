@@ -94,4 +94,4 @@ src/fty-metric-cache.cfg
 
 # Some automatically generated files for builds that are not used
 *.cmake
-test_state_file
+
