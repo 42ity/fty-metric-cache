@@ -11,18 +11,46 @@ services:
 
 env:
 - BUILD_TYPE=default
+- BUILD_TYPE=default-Werror
+#- BUILD_TYPE=cmake
 #- BUILD_TYPE=android
 #- BUILD_TYPE=check-py
-#- BUILD_TYPE=cmake
+
+matrix:
+  include:
+  - env: BUILD_TYPE=valgrind
+    os: linux
+    dist: trusty
+    sudo: required
+    addons:
+      apt:
+        packages:
+        - valgrind
 
 addons:
   apt:
     packages:
-    - valgrind
     - git
+    - asciidoc
+    - xmlto
+    - apport
 
 before_install:
-- if [ $TRAVIS_OS_NAME == "osx" ] ; then brew update; brew install binutils valgrind ; fi
+- ulimit -c
+- ulimit -a -S
+- ulimit -a -H
+- cat /proc/sys/kernel/core_pattern
+
+install:
+- sudo apt-get install -y gdb  # install gdb
+
+before_script:
+- ulimit -c unlimited -S       # enable core dumps
 
 # Hand off to generated script for each BUILD_TYPE
 script: ./ci_build.sh
+
+after_failure:
+- COREFILE=$(find . -maxdepth 10 -name "core*" | head -n 1) # find core file ?
+- echo $COREFILE
+- if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" example -ex "thread apply all bt" -ex "set pagination 0" -batch; fi
