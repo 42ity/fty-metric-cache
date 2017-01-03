@@ -119,11 +119,42 @@ fi
 
 was_czmq_check_lib_detected=no
 
-PKG_CHECK_MODULES([czmq], [libczmq >= 3.0.0],
+PKG_CHECK_MODULES([czmq], [libczmq >= 0.0.0],
     [
     ],
     [
-        AC_MSG_ERROR([Cannot find libczmq 3.0.0 or higher])
+        AC_ARG_WITH([libczmq],
+            [
+                AS_HELP_STRING([--with-libczmq],
+                [Specify libczmq prefix])
+            ],
+            [search_libczmq="yes"],
+            [])
+
+        czmq_synthetic_cflags=""
+        czmq_synthetic_libs="-lczmq"
+
+        if test "x$search_libczmq" = "xyes"; then
+            if test -r "${with_libczmq}/include/czmq.h"; then
+                czmq_synthetic_cflags="-I${with_libczmq}/include"
+                czmq_synthetic_libs="-L${with_libczmq}/lib -lczmq"
+            else
+                AC_MSG_ERROR([${with_libczmq}/include/czmq.h not found. Please check libczmq prefix])
+            fi
+        fi
+
+
+        AC_CHECK_LIB([czmq], [zctx_test],
+            [
+                CFLAGS="${czmq_synthetic_cflags} ${CFLAGS}"
+                LDFLAGS="${czmq_synthetic_libs} ${LDFLAGS}"
+                LIBS="${czmq_synthetic_libs} ${LIBS}"
+
+                AC_SUBST([czmq_CFLAGS],[${czmq_synthetic_cflags}])
+                AC_SUBST([czmq_LIBS],[${czmq_synthetic_libs}])
+                was_czmq_check_lib_detected=yes
+            ],
+            [AC_MSG_ERROR([cannot link with -lczmq, install libczmq])])
     ])
 
 if test "x$was_czmq_check_lib_detected" = "xno"; then
@@ -145,9 +176,9 @@ if test "x$was_malamute_check_lib_detected" = "xno"; then
     LIBS="${malamute_LIBS} ${LIBS}"
 fi
 
-was_libfty_proto_check_lib_detected=no
+was_fty_proto_check_lib_detected=no
 
-PKG_CHECK_MODULES([libfty_proto], [libfty_proto >= 0.0.0],
+PKG_CHECK_MODULES([fty_proto], [libfty_proto >= 0.0.0],
     [
     ],
     [
@@ -159,13 +190,13 @@ PKG_CHECK_MODULES([libfty_proto], [libfty_proto >= 0.0.0],
             [search_libfty_proto="yes"],
             [])
 
-        libfty_proto_synthetic_cflags=""
-        libfty_proto_synthetic_libs="-lftyproto"
+        fty_proto_synthetic_cflags=""
+        fty_proto_synthetic_libs="-lftyproto"
 
         if test "x$search_libfty_proto" = "xyes"; then
             if test -r "${with_libfty_proto}/include/ftyproto.h"; then
-                libfty_proto_synthetic_cflags="-I${with_libfty_proto}/include"
-                libfty_proto_synthetic_libs="-L${with_libfty_proto}/lib -lftyproto"
+                fty_proto_synthetic_cflags="-I${with_libfty_proto}/include"
+                fty_proto_synthetic_libs="-L${with_libfty_proto}/lib -lftyproto"
             else
                 AC_MSG_ERROR([${with_libfty_proto}/include/ftyproto.h not found. Please check libfty_proto prefix])
             fi
@@ -174,20 +205,20 @@ PKG_CHECK_MODULES([libfty_proto], [libfty_proto >= 0.0.0],
 
         AC_CHECK_LIB([ftyproto], [fty_proto_test],
             [
-                CFLAGS="${libfty_proto_synthetic_cflags} ${CFLAGS}"
-                LDFLAGS="${libfty_proto_synthetic_libs} ${LDFLAGS}"
-                LIBS="${libfty_proto_synthetic_libs} ${LIBS}"
+                CFLAGS="${fty_proto_synthetic_cflags} ${CFLAGS}"
+                LDFLAGS="${fty_proto_synthetic_libs} ${LDFLAGS}"
+                LIBS="${fty_proto_synthetic_libs} ${LIBS}"
 
-                AC_SUBST([libfty_proto_CFLAGS],[${libfty_proto_synthetic_cflags}])
-                AC_SUBST([libfty_proto_LIBS],[${libfty_proto_synthetic_libs}])
-                was_libfty_proto_check_lib_detected=yes
+                AC_SUBST([fty_proto_CFLAGS],[${fty_proto_synthetic_cflags}])
+                AC_SUBST([fty_proto_LIBS],[${fty_proto_synthetic_libs}])
+                was_fty_proto_check_lib_detected=yes
             ],
             [AC_MSG_ERROR([cannot link with -lftyproto, install libfty_proto])])
     ])
 
-if test "x$was_libfty_proto_check_lib_detected" = "xno"; then
-    CFLAGS="${libfty_proto_CFLAGS} ${CFLAGS}"
-    LIBS="${libfty_proto_LIBS} ${LIBS}"
+if test "x$was_fty_proto_check_lib_detected" = "xno"; then
+    CFLAGS="${fty_proto_CFLAGS} ${CFLAGS}"
+    LIBS="${fty_proto_LIBS} ${LIBS}"
 fi
 
 CFLAGS="${PREVIOUS_CFLAGS}"

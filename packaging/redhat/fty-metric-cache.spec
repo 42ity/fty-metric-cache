@@ -22,7 +22,7 @@ Name:           fty-metric-cache
 Version:        1.0.0
 Release:        1
 Summary:        knows current values of any metric in the system
-License:        MIT
+License:        GPL-2.0+
 URL:            http://example.com/
 Source0:        %{name}-%{version}.tar.gz
 Group:          System/Libraries
@@ -34,7 +34,7 @@ BuildRequires:  systemd-devel
 BuildRequires:  zeromq-devel
 BuildRequires:  czmq-devel
 BuildRequires:  malamute-devel
-BuildRequires:  libfty_proto-devel
+BuildRequires:  fty-proto-devel
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 %description
@@ -63,7 +63,7 @@ Requires:       libfty_metric_cache1 = %{version}
 Requires:       zeromq-devel
 Requires:       czmq-devel
 Requires:       malamute-devel
-Requires:       libfty_proto-devel
+Requires:       fty-proto-devel
 
 %description devel
 fty-metric-cache knows current values of any metric in the system.
