@@ -50,7 +50,7 @@ GENERATED_DOCS =
 
 GENERATED_DOCS += fty_metric_cache_server.txt fty_metric_cache_server.doc
 fty_metric_cache_server.txt: $(top_srcdir)/src/fty_metric_cache_server.c
-	$(srcdir)/mkman fty_metric_cache_server $(builddir)/fty-metric-cache-server $(srcdir)/..
+	$(srcdir)/mkman fty_metric_cache_server $(builddir)/fty_metric_cache_server $(srcdir)/.. # minus replaced with underscore manually
 
 GENERATED_DOCS += fty-metric-cache.txt fty-metric-cache.doc
 fty-metric-cache.txt: $(top_srcdir)/src/fty_metric_cache.c
