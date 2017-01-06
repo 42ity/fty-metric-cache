@@ -43,22 +43,22 @@
 
 //  *** Draft method, defined for internal use only ***
 //  Self test of this class.
-FTY_METRIC_CACHE_EXPORT void
+FTY_METRIC_CACHE_PRIVATE void
     logger_test (bool verbose);
 
 //  *** Draft method, defined for internal use only ***
 //  Self test of this class.
-FTY_METRIC_CACHE_EXPORT void
+FTY_METRIC_CACHE_PRIVATE void
     actor_commands_test (bool verbose);
 
 //  *** Draft method, defined for internal use only ***
 //  Self test of this class.
-FTY_METRIC_CACHE_EXPORT void
+FTY_METRIC_CACHE_PRIVATE void
     rt_test (bool verbose);
 
 //  *** Draft method, defined for internal use only ***
 //  Self test of this class.
-FTY_METRIC_CACHE_EXPORT void
+FTY_METRIC_CACHE_PRIVATE void
     mailbox_test (bool verbose);
 
 #endif // FTY_METRIC_CACHE_BUILD_DRAFT_API

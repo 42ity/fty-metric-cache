@@ -2,6 +2,7 @@
     name = "fty-metric-cache"
     description = "Knows current values of any METRIC in the system"
     script = "zproject.gsl"
+    url = "https://42ity.org"
     email = "EatonIPCOpenSource@eaton.com"
     repository = "https://github.com/42ity/fty-metric-cache" 
     license = "GPL-2.0+"
@@ -19,7 +20,7 @@
     <use project = "malamute" min_major = "1" />
 
     <use project = "fty-proto" libname = "libfty_proto" prefix="ftyproto"
-        min_major = "0" min_minor = "0" min_patch = "0"
+        min_major = "1" min_minor = "0" min_patch = "0"
         repository = "https://github.com/42ity/fty-proto"
         test = "fty_proto_test">
         <use project = "malamute"/>

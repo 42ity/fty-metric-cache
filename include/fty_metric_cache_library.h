@@ -47,13 +47,25 @@
 #if defined (__WINDOWS__)
 #   if defined FTY_METRIC_CACHE_STATIC
 #       define FTY_METRIC_CACHE_EXPORT
+#   elif defined FTY_METRIC_CACHE_INTERNAL_BUILD
+#       if defined DLL_EXPORT
+#           define FTY_METRIC_CACHE_EXPORT __declspec(dllexport)
+#       else
+#           define FTY_METRIC_CACHE_EXPORT
+#       endif
 #   elif defined FTY_METRIC_CACHE_EXPORTS
 #       define FTY_METRIC_CACHE_EXPORT __declspec(dllexport)
 #   else
 #       define FTY_METRIC_CACHE_EXPORT __declspec(dllimport)
 #   endif
+#   define FTY_METRIC_CACHE_PRIVATE
 #else
 #   define FTY_METRIC_CACHE_EXPORT
+#   if (defined __GNUC__ && __GNUC__ >= 4) || defined __INTEL_COMPILER
+#       define FTY_METRIC_CACHE_PRIVATE __attribute__ ((visibility ("hidden")))
+#   else
+#       define FTY_METRIC_CACHE_PRIVATE
+#   endif
 #endif
 
 //  Opaque class structures to allow forward references

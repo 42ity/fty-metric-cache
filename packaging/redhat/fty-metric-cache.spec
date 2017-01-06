@@ -18,19 +18,37 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.            
 #
 
+# To build with draft APIs, use "--with drafts" in rpmbuild for local builds or add
+#   Macros:
+#   %_with_drafts 1
+# at the BOTTOM of the OBS prjconf
+%bcond_with drafts
+%if %{with drafts}
+%define DRAFTS yes
+%else
+%define DRAFTS no
+%endif
 Name:           fty-metric-cache
 Version:        1.0.0
 Release:        1
 Summary:        knows current values of any metric in the system
 License:        GPL-2.0+
-URL:            http://example.com/
+URL:            https://42ity.org
 Source0:        %{name}-%{version}.tar.gz
 Group:          System/Libraries
+# Note: ghostscript is required by graphviz which is required by
+#       asciidoc. On Fedora 24 the ghostscript dependencies cannot
+#       be resolved automatically. Thus add working dependency here!
+BuildRequires:  ghostscript
+BuildRequires:  asciidoc
 BuildRequires:  automake
 BuildRequires:  autoconf
 BuildRequires:  libtool
-BuildRequires:  pkg-config
+BuildRequires:  pkgconfig
 BuildRequires:  systemd-devel
+BuildRequires:  systemd
+%{?systemd_requires}
+BuildRequires:  xmlto
 BuildRequires:  zeromq-devel
 BuildRequires:  czmq-devel
 BuildRequires:  malamute-devel
@@ -40,47 +58,46 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %description
 fty-metric-cache knows current values of any metric in the system.
 
-%package -n libfty_metric_cache1
+%package -n libfty_metric_cache0
 Group:          System/Libraries
-Summary:        knows current values of any metric in the system
+Summary:        knows current values of any metric in the system shared library
 
-%description -n libfty_metric_cache1
-fty-metric-cache knows current values of any metric in the system.
-This package contains shared library.
+%description -n libfty_metric_cache0
+This package contains shared library for fty-metric-cache: knows current values of any metric in the system
 
-%post -n libfty_metric_cache1 -p /sbin/ldconfig
-%postun -n libfty_metric_cache1 -p /sbin/ldconfig
+%post -n libfty_metric_cache0 -p /sbin/ldconfig
+%postun -n libfty_metric_cache0 -p /sbin/ldconfig
 
-%files -n libfty_metric_cache1
+%files -n libfty_metric_cache0
 %defattr(-,root,root)
-%doc COPYING
 %{_libdir}/libfty_metric_cache.so.*
 
 %package devel
 Summary:        knows current values of any metric in the system
 Group:          System/Libraries
-Requires:       libfty_metric_cache1 = %{version}
+Requires:       libfty_metric_cache0 = %{version}
 Requires:       zeromq-devel
 Requires:       czmq-devel
 Requires:       malamute-devel
 Requires:       fty-proto-devel
 
 %description devel
-fty-metric-cache knows current values of any metric in the system.
-This package contains development files.
+knows current values of any metric in the system development tools
+This package contains development files for fty-metric-cache: knows current values of any metric in the system
 
 %files devel
 %defattr(-,root,root)
 %{_includedir}/*
 %{_libdir}/libfty_metric_cache.so
 %{_libdir}/pkgconfig/libfty_metric_cache.pc
+%{_mandir}/man3/*
 
 %prep
 %setup -q
 
 %build
 sh autogen.sh
-%{configure} --with-systemd-units
+%{configure} --enable-drafts=%{DRAFTS} --with-systemd-units
 make %{_smp_mflags}
 
 %install
@@ -93,8 +110,19 @@ find %{buildroot} -name '*.la' | xargs rm -f
 %files
 %defattr(-,root,root)
 %{_bindir}/fty-metric-cache
+%{_mandir}/man1/fty-metric-cache*
 %{_bindir}/fty-metric-cache-cli
-%{_prefix}/lib/systemd/system/fty-metric-cache*.service
-
+%{_mandir}/man1/fty-metric-cache-cli*
+%config(noreplace) %{_sysconfdir}/fty-metric-cache/fty-metric-cache.cfg
+/usr/lib/systemd/system/fty-metric-cache.service
+%dir %{_sysconfdir}/fty-metric-cache
+%if 0%{?suse_version} > 1315
+%post
+%systemd_post fty-metric-cache.service
+%preun
+%systemd_preun fty-metric-cache.service
+%postun
+%systemd_postun_with_restart fty-metric-cache.service
+%endif
 
 %changelog

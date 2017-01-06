@@ -36,10 +36,6 @@ typedef struct {
 
 static test_item_t
 all_tests [] = {
-    { "logger", logger_test },
-    { "actor_commands", actor_commands_test },
-    { "rt", rt_test },
-    { "mailbox", mailbox_test },
     { "fty_metric_cache_server", fty_metric_cache_server_test },
     {0, 0}          //  Sentinel
 };

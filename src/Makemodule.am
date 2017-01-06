@@ -45,6 +45,10 @@ endif
 
 src_libfty_metric_cache_la_LIBADD = ${project_libs}
 
+if WITH_SYSTEMD_UNITS
+systemdsystemunit_DATA =
+endif #WITH_SYSTEMD_UNITS
+
 if ENABLE_FTY_METRIC_CACHE
 bin_PROGRAMS += src/fty-metric-cache
 src_fty_metric_cache_CPPFLAGS = ${AM_CPPFLAGS}
@@ -53,8 +57,7 @@ src_fty_metric_cache_SOURCES = src/fty_metric_cache.c
 src_fty_metric_cache_config_DATA = src/fty-metric-cache.cfg
 src_fty_metric_cache_configdir = $(sysconfdir)/fty-metric-cache
 if WITH_SYSTEMD_UNITS
-src_fty_metric_cache_servicedir = @prefix@/lib/systemd/system
-src_fty_metric_cache_service_DATA = src/fty-metric-cache.service
+systemdsystemunit_DATA += src/fty-metric-cache.service
 endif #WITH_SYSTEMD_UNITS
 endif #ENABLE_FTY_METRIC_CACHE
 
@@ -83,31 +86,31 @@ src:
 	cd $(srcdir); gsl -target:- project.xml
 
 check-local: src/fty_metric_cache_selftest
-	$(LIBTOOL) --mode=execute $(srcdir)/src/fty_metric_cache_selftest
+	$(LIBTOOL) --mode=execute $(builddir)/src/fty_metric_cache_selftest
 
 check-verbose: src/fty_metric_cache_selftest
-	$(LIBTOOL) --mode=execute $(srcdir)/src/fty_metric_cache_selftest -v
+	$(LIBTOOL) --mode=execute $(builddir)/src/fty_metric_cache_selftest -v
 
 # Run the selftest binary under valgrind to check for memory leaks
 memcheck: src/fty_metric_cache_selftest
 	$(LIBTOOL) --mode=execute valgrind --tool=memcheck \
 		--leak-check=full --show-reachable=yes --error-exitcode=1 \
 		--suppressions=$(srcdir)/src/.valgrind.supp \
-		$(srcdir)/src/fty_metric_cache_selftest
+		$(builddir)/src/fty_metric_cache_selftest
 
 # Run the selftest binary under valgrind to check for performance leaks
 callcheck: src/fty_metric_cache_selftest
 	$(LIBTOOL) --mode=execute valgrind --tool=callgrind \
-		$(srcdir)/src/fty_metric_cache_selftest
+		$(builddir)/src/fty_metric_cache_selftest
 
 # Run the selftest binary under gdb for debugging
 debug: src/fty_metric_cache_selftest
 	$(LIBTOOL) --mode=execute gdb -q \
-		$(srcdir)/src/fty_metric_cache_selftest
+		$(builddir)/src/fty_metric_cache_selftest
 
 # Run the selftest binary with verbose switch for tracing
 animate: src/fty_metric_cache_selftest
-	$(LIBTOOL) --mode=execute $(srcdir)/src/fty_metric_cache_selftest -v
+	$(LIBTOOL) --mode=execute $(builddir)/src/fty_metric_cache_selftest -v
 
 if WITH_GCOV
 coverage: src/fty_metric_cache_selftest
