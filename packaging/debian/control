@@ -25,35 +25,36 @@ Standards-Version: 3.9.7
 Build-Depends: debhelper (>= 9),
     pkg-config,
     dh-autoreconf,
-    libzmq5-dev,
+    libzmq3-dev,
     libczmq-dev,
     libmlm-dev,
     libfty-proto-dev,
-    dh-autoreconf,
     systemd,
-    dh-systemd
+    dh-systemd,
+Build-Depends-Indep: asciidoc,
+                     xmlto
 
 Package: libfty-metric-cache1
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: fty-metric-cache
+Description: knows current values of any metric in the system shared library
  This package contains shared library for fty-metric-cache: knows current values of any metric in the system
 
 Package: libfty-metric-cache-dev
 Architecture: any
 Section: libdevel
 Depends:
-    libzmq5-dev,
+    libzmq3-dev,
     libczmq-dev,
     libmlm-dev,
     libfty-proto-dev,
     libfty-metric-cache1 (= ${binary:Version})
-Description: development files for fty-metric-cache
+Description: knows current values of any metric in the system development tools
  This package contains development files for fty-metric-cache: knows current values of any metric in the system
 
 Package: fty-metric-cache
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends},
 Description: knows current values of any metric in the system
  Main package for fty-metric-cache: knows current values of any metric in the system
 
@@ -64,6 +65,6 @@ Priority: extra
 Depends:
     fty-metric-cache (= ${binary:Version}),
     ${misc:Depends}
-Description: debugging symbols for fty-metric-cache
+Description: knows current values of any metric in the system debugging symbols
  This package contains the debugging symbols for fty-metric-cache : knows current values of any metric in the system.
 
