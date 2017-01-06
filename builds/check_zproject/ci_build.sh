@@ -7,7 +7,7 @@ set -ex
 
 cd "$REPO_DIR/.."
 git clone --quiet --depth 1 https://github.com/zeromq/libzmq.git libzmq
-git clone --quiet --depth 1 https://github.com/42ity/czmq.git czmq
+git clone --quiet --depth 1 -b v3.0.2 https://github.com/42ity/czmq.git czmq # correct version of czmq manually added
 git clone --quiet --depth 1 https://github.com/zeromq/malamute.git malamute
 git clone --quiet --depth 1 https://github.com/42ity/fty-proto fty-proto
 cd -
