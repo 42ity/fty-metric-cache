@@ -38,7 +38,7 @@ void print_device(const char *device, mlm_client_t *cli){
     zmsg_addstr (send, "GET");
     zmsg_addstr (send, device);
 
-    int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    int rv = mlm_client_sendto (cli, FTY_METRIC_CACHE_MAILBOX, RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
 
@@ -47,7 +47,7 @@ void list_devices(mlm_client_t *cli){
     zmsg_addstr (send, "");
     zmsg_addstr (send, "LIST");
 
-    int rv = mlm_client_sendto (cli, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    int rv = mlm_client_sendto (cli, FTY_METRIC_CACHE_MAILBOX, RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
 }
 

@@ -31,7 +31,6 @@
 
 #define str(x) #x
 
-static const char *AGENT_NAME = "fty-metric-cache";
 static const char *ENDPOINT = "ipc://@/malamute";
 static const char *STATE_FILE = "/var/lib/bios/bios-agent-rt/state_file";
 
@@ -142,7 +141,7 @@ int main (int argc, char *argv [])
         return EXIT_FAILURE;
     }
     zstr_sendx (rt_server,  "CONFIGURE", state_file, NULL);
-    zstr_sendx (rt_server,  "CONNECT", ENDPOINT, AGENT_NAME, NULL);
+    zstr_sendx (rt_server,  "CONNECT", ENDPOINT, FTY_METRIC_CACHE_MAILBOX, NULL);
     zstr_sendx (rt_server,  "CONSUMER", FTY_PROTO_STREAM_METRICS, ".*", NULL);
 
     while (true) {
