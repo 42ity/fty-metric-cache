@@ -26,7 +26,10 @@
 extern "C" {
 #endif
 
+#ifndef RT_T_DEFINED
 typedef struct _rt_t rt_t;
+#define RT_T_DEFINED
+#endif
 
 //  @interface
 //  Create a new rt
