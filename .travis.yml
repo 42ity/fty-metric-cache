@@ -1,5 +1,11 @@
 # Travis CI script
+# This is a skeleton created by zproject.
+# You can add hand-written code here.
+# Note: Heavily modified
+
 language: c
+
+cache: ccache
 
 os:
 - linux
@@ -9,15 +15,48 @@ sudo: false
 services:
 - docker
 
+# Set CI_TIME=true to enable build-step profiling in Travis
+# Set CI_TRACE=true to enable shell script tracing in Travis
+# Set CI_CONFIG_QUIET=true to enable "configure --quiet" (only report stderr)
 env:
-- BUILD_TYPE=default
-#- BUILD_TYPE=cmake
-#- BUILD_TYPE=android
-#- BUILD_TYPE=check-py
+  global:
+    - CI_TIME=false
+    - CI_TRACE=false
+    - CI_QUIET=true
+  matrix:
+    - BUILD_TYPE=default
+    - BUILD_TYPE=default-Werror
+#   - BUILD_TYPE=cmake
+#   - BUILD_TYPE=android
+#   - BUILD_TYPE=check-py
+
+matrix:
+  include:
+  - env: BUILD_TYPE=valgrind
+    os: linux
+    dist: trusty
+    sudo: required
+    addons:
+      apt:
+        packages:
+        - valgrind
+        - git
+        - apport
+        - asciidoc
+        - xmlto
 
 addons:
+  sources:
+  - sourceline: 'deb http://download.opensuse.org/repositories/home:/zeromq:/git-draft/xUbuntu_12.04/ ./'
+    key_url: 'http://download.opensuse.org/repositories/home:/zeromq:/git-draft/xUbuntu_12.04/Release.key'
   apt:
     packages:
+    - asciidoc
+    - xmlto
+#    - libzmq3-dev
+#    - libczmq-dev
+#    - libmlm-dev
+#    - libfty-proto-dev
     - git
     - apport
     - valgrind
@@ -45,3 +84,17 @@ script: ./ci_build.sh
 after_failure:
 - COREFILE=$(find . -maxdepth 10 -name "core*" | head -n 1) 
 - if [[ -f "$COREFILE" ]]; then gdb -c "$COREFILE" example -ex "thread apply all bt" -ex "set pagination 0" -batch; fi
+
+before_deploy: . ./ci_deploy.sh
+deploy:
+  provider: releases
+  api_key:
+    # To encrypt your access token run: `travis encrypt -r user/repo`
+    secure: <encrypted github access token>
+  file_glob: true
+  file: ${FTY_METRIC_CACHE_DEPLOYMENT}
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true
+    condition: $TRAVIS_OS_NAME =~ (linux) && $BUILD_TYPE =~ (default)

@@ -1,7 +1,7 @@
 #
 #    fty-metric-cache - Knows current values of any METRIC in the system
 #
-#    Copyright (C) 2014 - 2015 Eaton                                        
+#    Copyright (C) 2014 - 2017 Eaton                                        
 #                                                                           
 #    This program is free software; you can redistribute it and/or modify   
 #    it under the terms of the GNU General Public License as published by   
@@ -58,24 +58,24 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 %description
 fty-metric-cache knows current values of any metric in the system.
 
-%package -n libfty_metric_cache0
+%package -n libfty_metric_cache1
 Group:          System/Libraries
 Summary:        knows current values of any metric in the system shared library
 
-%description -n libfty_metric_cache0
+%description -n libfty_metric_cache1
 This package contains shared library for fty-metric-cache: knows current values of any metric in the system
 
-%post -n libfty_metric_cache0 -p /sbin/ldconfig
-%postun -n libfty_metric_cache0 -p /sbin/ldconfig
+%post -n libfty_metric_cache1 -p /sbin/ldconfig
+%postun -n libfty_metric_cache1 -p /sbin/ldconfig
 
-%files -n libfty_metric_cache0
+%files -n libfty_metric_cache1
 %defattr(-,root,root)
 %{_libdir}/libfty_metric_cache.so.*
 
 %package devel
 Summary:        knows current values of any metric in the system
 Group:          System/Libraries
-Requires:       libfty_metric_cache0 = %{version}
+Requires:       libfty_metric_cache1 = %{version}
 Requires:       zeromq-devel
 Requires:       czmq-devel
 Requires:       malamute-devel
@@ -91,6 +91,7 @@ This package contains development files for fty-metric-cache: knows current valu
 %{_libdir}/libfty_metric_cache.so
 %{_libdir}/pkgconfig/libfty_metric_cache.pc
 %{_mandir}/man3/*
+%{_mandir}/man7/*
 
 %prep
 %setup -q

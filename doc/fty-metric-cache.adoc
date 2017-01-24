@@ -1,0 +1,51 @@
+Name(7)
+=======
+
+
+NAME
+----
+fty-metric-cache - Overview of Knows current values of any METRIC in the system
+
+
+SYNOPSIS
+--------
+
+Project fty-metric-cache aims to ... (short marketing pitch)
+
+It delivers several programs with their respective man pages:
+ fty-metric-cache.1 fty-metric-cache-cli.1
+and public classes in a shared library:
+ fty_metric_cache_server.3
+
+Generally you can compile and link against it like this:
+----
+#include <fty_metric_cache.h>
+
+cc ['flags'] 'files' -lfty_metric_cache ['libraries']
+----
+
+
+DESCRIPTION
+-----------
+
+This is a skeleton document created by zproject, which will not be
+regenerated automatically (by Makefiles nor project.xml re-parsing).
+You should add hand-written text here to detail whatever applies to
+Linux standard manpage Section 7 (note that other OSes may follow
+a different standard with similar concepts, and extend the recipes
+to package this document into a different section number):
+
+----
+7 Overview, conventions, and miscellaneous :
+    Overviews or descriptions of various topics, conventions
+    and protocols, character set standards, the standard
+    filesystem layout, and miscellaneous other things.
+----
+
+Classes
+~~~~~~~
+
+Something for developers to consider. Note there are separate man
+pages generated for public classes during build with contents taken
+from source code comments.
+

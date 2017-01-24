@@ -4,9 +4,8 @@
     script = "zproject.gsl"
     url = "https://42ity.org"
     email = "EatonIPCOpenSource@eaton.com"
-    repository = "https://github.com/42ity/fty-metric-cache" 
+    repository = "https://github.com/42ity/fty-metric-cache"
     license = "GPL-2.0+"
-    abi = "1:0:0"
     >
 
     <target name = "debian" />
@@ -15,8 +14,10 @@
 
     <include filename = "license.xml" />
     <version major = "1" minor = "0" patch = "0" />
-    <use project = "czmq" release = "v3.0.2" 
-	 repository="https://github.com/42ity/czmq.git"/>
+    <abi current = "1" revision = "0" age = "0" />
+
+    <use project = "czmq" release = "v3.0.2"
+        repository="https://github.com/42ity/czmq.git"/>
     <use project = "malamute" min_major = "1" />
 
     <use project = "fty-proto" libname = "libfty_proto" prefix="ftyproto"
@@ -36,7 +37,7 @@
     </class>
 
     <main name = "fty-metric-cache" service = "1" no_config = "1">
-        Listens on all metrics in order to remeber the last ones.
+        Listens on all metrics in order to remember the last ones
     </main>
     <main name = "fty-metric-cache-cli">
         Command line interface for fty-metric-cache

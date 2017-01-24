@@ -25,6 +25,11 @@ src_libfty_metric_cache_la_SOURCES = \
     src/fty_metric_cache_server.c \
     src/platform.h
 
+if ENABLE_DRAFTS
+src_libfty_metric_cache_la_SOURCES += \
+    src/fty_metric_cache_private_selftest.c
+endif
+
 src_libfty_metric_cache_la_CPPFLAGS = ${AM_CPPFLAGS}
 
 src_libfty_metric_cache_la_LDFLAGS = \
