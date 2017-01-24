@@ -1,7 +1,7 @@
 /*  =========================================================================
     rt - Metric cache structure
 
-    Copyright (C) 2014 - 2015 Eaton
+    Copyright (C) 2014 - 2017 Eaton
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,10 @@
 extern "C" {
 #endif
 
+#ifndef RT_T_DEFINED
 typedef struct _rt_t rt_t;
+#define RT_T_DEFINED
+#endif
 
 //  @interface
 //  Create a new rt

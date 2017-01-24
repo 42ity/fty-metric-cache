@@ -1,7 +1,7 @@
 /*  =========================================================================
     fty_metric_cache_classes - private header file
 
-    Copyright (C) 2014 - 2015 Eaton                                        
+    Copyright (C) 2014 - 2017 Eaton                                        
                                                                            
     This program is free software; you can redistribute it and/or modify   
     it under the terms of the GNU General Public License as published by   
@@ -32,6 +32,26 @@
 //  External API
 #include "../include/fty_metric_cache.h"
 
+//  Extra headers
+
+//  Opaque class structures to allow forward references
+#ifndef LOGGER_T_DEFINED
+typedef struct _logger_t logger_t;
+#define LOGGER_T_DEFINED
+#endif
+#ifndef ACTOR_COMMANDS_T_DEFINED
+typedef struct _actor_commands_t actor_commands_t;
+#define ACTOR_COMMANDS_T_DEFINED
+#endif
+#ifndef RT_T_DEFINED
+typedef struct _rt_t rt_t;
+#define RT_T_DEFINED
+#endif
+#ifndef MAILBOX_T_DEFINED
+typedef struct _mailbox_t mailbox_t;
+#define MAILBOX_T_DEFINED
+#endif
+
 //  Internal API
 #include "logger.h"
 #include "actor_commands.h"
@@ -60,6 +80,10 @@ FTY_METRIC_CACHE_PRIVATE void
 //  Self test of this class.
 FTY_METRIC_CACHE_PRIVATE void
     mailbox_test (bool verbose);
+
+//  Self test for private classes
+FTY_METRIC_CACHE_PRIVATE void
+    fty_metric_cache_private_selftest (bool verbose);
 
 #endif // FTY_METRIC_CACHE_BUILD_DRAFT_API
 

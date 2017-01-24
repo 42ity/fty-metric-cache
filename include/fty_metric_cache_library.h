@@ -1,7 +1,7 @@
 /*  =========================================================================
     fty-metric-cache - generated layer of public API
 
-    Copyright (C) 2014 - 2015 Eaton                                        
+    Copyright (C) 2014 - 2017 Eaton                                        
                                                                            
     This program is free software; you can redistribute it and/or modify   
     it under the terms of the GNU General Public License as published by   
@@ -76,6 +76,12 @@ typedef struct _fty_metric_cache_server_t fty_metric_cache_server_t;
 
 //  Public classes, each with its own header file
 #include "fty_metric_cache_server.h"
+
+#ifdef FTY_METRIC_CACHE_BUILD_DRAFT_API
+//  Self test for private classes
+FTY_METRIC_CACHE_EXPORT void
+    fty_metric_cache_private_selftest (bool verbose);
+#endif // FTY_METRIC_CACHE_BUILD_DRAFT_API
 
 #endif
 /*
