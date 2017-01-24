@@ -59,7 +59,7 @@ bin_PROGRAMS += src/fty-metric-cache
 src_fty_metric_cache_CPPFLAGS = ${AM_CPPFLAGS}
 src_fty_metric_cache_LDADD = ${program_libs}
 src_fty_metric_cache_SOURCES = src/fty_metric_cache.c
-src_fty_metric_cache_config_DATA = src/fty-metric-cache.cfg
+src_fty_metric_cache_config_DATA =
 src_fty_metric_cache_configdir = $(sysconfdir)/fty-metric-cache
 if WITH_SYSTEMD_UNITS
 systemdsystemunit_DATA += src/fty-metric-cache.service

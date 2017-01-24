@@ -758,7 +758,6 @@ AS_IF([test "x$enable_Werror" = "xyes" || test "x$enable_Werror" = "xauto"],
 AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  src/libfty_metric_cache.pc
-                 src/fty-metric-cache.cfg
                  ])
 
 AM_COND_IF([WITH_SYSTEMD_UNITS],

@@ -114,7 +114,6 @@ find %{buildroot} -name '*.la' | xargs rm -f
 %{_mandir}/man1/fty-metric-cache*
 %{_bindir}/fty-metric-cache-cli
 %{_mandir}/man1/fty-metric-cache-cli*
-%config(noreplace) %{_sysconfdir}/fty-metric-cache/fty-metric-cache.cfg
 /usr/lib/systemd/system/fty-metric-cache.service
 %dir %{_sysconfdir}/fty-metric-cache
 %if 0%{?suse_version} > 1315
