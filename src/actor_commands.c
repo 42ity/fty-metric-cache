@@ -167,6 +167,8 @@ actor_commands (
     fseek (fp, 0L, SEEK_END);\
     uint64_t sz = ftell (fp);\
     fclose (fp);\
+    if (sz > 0)\
+        printf("STDERR_EMPTY() check failed, please review the stderr.txt in workspace root\n");\
     assert (sz == 0);\
     }
 
@@ -175,6 +177,8 @@ actor_commands (
     fseek (fp, 0L, SEEK_END);\
     uint64_t sz = ftell (fp);\
     fclose (fp);\
+    if (sz == 0)\
+        printf("STDERR_NON_EMPTY() check failed\n");\
     assert (sz > 0);\
     }
 
