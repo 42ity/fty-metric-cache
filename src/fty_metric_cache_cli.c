@@ -141,7 +141,7 @@ int main (int argc, char *argv [])
                         _bufftime,
                         fty_proto_ttl (fty_p_element),
                         fty_proto_type (fty_p_element),
-                        fty_proto_element_src (fty_p_element),
+                        fty_proto_name (fty_p_element),
                         fty_proto_value (fty_p_element),
                         fty_proto_unit (fty_p_element));
                 fty_proto_destroy(&fty_p_element);
