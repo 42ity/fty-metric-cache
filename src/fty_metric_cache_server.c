@@ -264,13 +264,13 @@ fty_metric_cache_server_test (bool verbose)
     assert (encoded);
 
     fty_proto_t *proto = fty_proto_decode (&encoded);
-    test_assert_proto (proto, "humidity", "ups", "45", "%", 5);
+    test_assert_proto (proto, "humidity", "ups", "45", "%", 60);
     fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
     assert (encoded);
     proto = fty_proto_decode (&encoded);
-    test_assert_proto (proto, "temperature", "ups", "30", "C", 5);
+    test_assert_proto (proto, "temperature", "ups", "30", "C", 60);
     fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
@@ -321,7 +321,7 @@ fty_metric_cache_server_test (bool verbose)
     assert (encoded);
 
     proto = fty_proto_decode (&encoded);
-    test_assert_proto (proto, "temperature", "epdu", "70", "C", 29);
+    test_assert_proto (proto, "temperature", "epdu", "70", "C", 60);
     fty_proto_destroy (&proto);
 
     encoded = zmsg_popmsg (reply);
