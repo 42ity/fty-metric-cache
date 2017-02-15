@@ -177,7 +177,7 @@ test_assert_proto (
 {
     assert (p);
     assert (streq (fty_proto_type (p), type));
-    assert (streq (fty_proto_element_src (p), element));
+    assert (streq (fty_proto_name (p), element));
     assert (streq (fty_proto_unit (p), unit));
     assert (streq (fty_proto_value (p), value));
     assert (fty_proto_ttl (p) == ttl);
@@ -208,22 +208,22 @@ fty_metric_cache_server_test (bool verbose)
     zstr_sendx (rt, "CONSUMER", "METRICS", ".*", NULL);
     zclock_sleep (100);
 
-    zmsg_t *msg = fty_proto_encode_metric (NULL, "temperature", "ups", "30", "C", 5);
+    zmsg_t *msg = fty_proto_encode_metric (NULL, 5, 60, "temperature", "ups", "30", "C");
     int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = fty_proto_encode_metric (NULL, "humidity", "ups", "45", "%", 5);
+    msg = fty_proto_encode_metric (NULL, 5, 60, "humidity", "ups", "45", "%");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = fty_proto_encode_metric (NULL, "temperature", "epdu", "25", "C", 60);
+    msg = fty_proto_encode_metric (NULL, 60, 60, "temperature", "epdu", "25", "C");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = fty_proto_encode_metric (NULL, "realpower.default", "switch", "100", "W", 55);
+    msg = fty_proto_encode_metric (NULL, 55, 60, "realpower.default", "switch", "100", "W");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
@@ -286,7 +286,7 @@ fty_metric_cache_server_test (bool verbose)
     //      1 changed measurement
     // ===============================================
 
-    msg = fty_proto_encode_metric (NULL, "temperature", "epdu", "70", "C", 29);
+    msg = fty_proto_encode_metric (NULL, 29, 60, "temperature", "epdu", "70", "C");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (10);

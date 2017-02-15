@@ -86,12 +86,12 @@ rt_put (rt_t *self, fty_proto_t **message_p)
         fty_proto_aux_insert (message, "time", "%" PRIu64, timestamp_s);
     }
 
-    zhashx_t *device = (zhashx_t *) zhashx_lookup (self->devices, fty_proto_element_src (message));
+    zhashx_t *device = (zhashx_t *) zhashx_lookup (self->devices, fty_proto_name (message));
     if (!device) {
         zhashx_t *metrics = zhashx_new ();
         zhashx_set_destructor (metrics, (zhashx_destructor_fn *) fty_proto_destroy);
 
-        int rv = zhashx_insert (self->devices, fty_proto_element_src (message), metrics);
+        int rv = zhashx_insert (self->devices, fty_proto_name (message), metrics);
         assert (rv == 0);
         device = metrics;
     }
@@ -306,7 +306,7 @@ rt_print (rt_t *self)
                     (const char *) zhashx_cursor (device),
                     fty_proto_aux_number (metric, "time", 0),
                     fty_proto_type (metric),
-                    fty_proto_element_src (metric),
+                    fty_proto_name (metric),
                     fty_proto_value (metric),
                     fty_proto_unit (metric),
                     fty_proto_ttl (metric));
@@ -356,7 +356,7 @@ test_metric_new (
 {
     fty_proto_t *metric = fty_proto_new (FTY_PROTO_METRIC);
     fty_proto_set_type (metric, "%s", type);
-    fty_proto_set_element_src (metric, "%s", element);
+    fty_proto_set_name (metric, "%s", element);
     fty_proto_set_unit (metric, "%s", unit);
     fty_proto_set_value (metric, "%s", value);
     fty_proto_set_ttl (metric, ttl);
@@ -374,7 +374,7 @@ test_assert_proto (
 {
     assert (p);
     assert (streq (fty_proto_type (p), type));
-    assert (streq (fty_proto_element_src (p), element));
+    assert (streq (fty_proto_name (p), element));
     assert (streq (fty_proto_unit (p), unit));
     assert (streq (fty_proto_value (p), value));
     assert (fty_proto_ttl (p) == ttl);

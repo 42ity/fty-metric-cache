@@ -151,7 +151,7 @@ test_metric_new (
 {
     fty_proto_t *metric = fty_proto_new (FTY_PROTO_METRIC);
     fty_proto_set_type (metric, "%s", type);
-    fty_proto_set_element_src (metric, "%s", element);
+    fty_proto_set_name (metric, "%s", element);
     fty_proto_set_unit (metric, "%s", unit);
     fty_proto_set_value (metric, "%s", value);
     fty_proto_set_ttl (metric, ttl);
@@ -169,7 +169,7 @@ test_assert_proto (
 {
     assert (p);
     assert (streq (fty_proto_type (p), type));
-    assert (streq (fty_proto_element_src (p), element));
+    assert (streq (fty_proto_name (p), element));
     assert (streq (fty_proto_unit (p), unit));
     assert (streq (fty_proto_value (p), value));
     assert (fty_proto_ttl (p) == ttl);
