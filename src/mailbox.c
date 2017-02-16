@@ -109,7 +109,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         if (hash) {
             fty_proto_t *metric = (fty_proto_t *) zhashx_first (hash);
             while (metric) {
-                if ( fty_proto_aux_number(metric, "time", 0) + fty_proto_ttl(metric) > now_s ) {
+                if ( fty_proto_time(metric) + fty_proto_ttl(metric) > now_s ) {
                     fty_proto_t *copy = fty_proto_dup (metric);
                     zmsg_t *encoded = fty_proto_encode (&copy);
                     zmsg_addmsg (reply, &encoded);

@@ -135,7 +135,7 @@ int main (int argc, char *argv [])
             fty_proto_t *fty_p_element;
             while(msg_part){
                 fty_p_element = fty_proto_decode(&msg_part);
-                uint64_t _time = fty_proto_aux_number (fty_p_element, "time", 0);
+                uint64_t _time = fty_proto_time (fty_p_element);
                 strftime(_bufftime, sizeof _bufftime, "%FT%TZ", gmtime((const time_t*)&_time));
                 printf("%s(ttl=%" PRIu32"s) %20s@%s = %s%s\n",
                         _bufftime,
