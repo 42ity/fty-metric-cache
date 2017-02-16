@@ -223,7 +223,7 @@ fty_metric_cache_server_test (bool verbose)
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = fty_proto_encode_metric (NULL,  time (NULL), 55, "realpower.default", "switch", "100", "W");
+    msg = fty_proto_encode_metric (NULL, time (NULL), 55, "realpower.default", "switch", "100", "W");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
