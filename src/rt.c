@@ -80,10 +80,9 @@ rt_put (rt_t *self, fty_proto_t **message_p)
     if (!message)
         return;
 
-    if ( !fty_proto_aux_string (message, "time", NULL) ) {
+    if ( !fty_proto_time (message) ) {
         // If time not set, assign time = NOW()
-        uint64_t timestamp_s = (uint64_t) zclock_time () / 1000;
-        fty_proto_aux_insert (message, "time", "%" PRIu64, timestamp_s);
+        fty_proto_set_time (message, (uint64_t) zclock_time () / 1000);
     }
 
     zhashx_t *device = (zhashx_t *) zhashx_lookup (self->devices, fty_proto_name (message));
@@ -144,7 +143,7 @@ rt_purge (rt_t *self)
         zlistx_set_duplicator (to_delete, (czmq_duplicator *) strdup);
 
         while (metric) {
-            uint64_t time_s = fty_proto_aux_number (metric, "time", 0);
+            uint64_t time_s = fty_proto_time (metric);
 
             if (timestamp_s - time_s > fty_proto_ttl (metric)) {
                 zlistx_add_end (to_delete, (void *) zhashx_cursor (device));
@@ -213,8 +212,11 @@ rt_load (rt_t *self, const char *fullpath)
         zmsg_t *zmessage = zmsg_decode (data, (size_t) *prefix);
         assert (zmessage);
         fty_proto_t *metric = fty_proto_decode (&zmessage); // zmessage destroyed
-        assert (metric);
-
+        if (! metric) {
+            // state file is broken
+            zsys_error ("state file '%s' is broken", fullpath);
+            break;
+        }
         rt_put (self, &metric);
     }
     zchunk_destroy (&chunk);
@@ -304,7 +306,7 @@ rt_print (rt_t *self)
         while (metric) {
             zsys_debug ("\t%s  -  %" PRIu64" %s %s %s %s %" PRIu32,
                     (const char *) zhashx_cursor (device),
-                    fty_proto_aux_number (metric, "time", 0),
+                    fty_proto_time (metric),
                     fty_proto_type (metric),
                     fty_proto_name (metric),
                     fty_proto_value (metric),

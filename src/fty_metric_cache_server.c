@@ -208,22 +208,22 @@ fty_metric_cache_server_test (bool verbose)
     zstr_sendx (rt, "CONSUMER", "METRICS", ".*", NULL);
     zclock_sleep (100);
 
-    zmsg_t *msg = fty_proto_encode_metric (NULL, 60, 5, "temperature", "ups", "30", "C");
+    zmsg_t *msg = fty_proto_encode_metric (NULL, time (NULL), 5, "temperature", "ups", "30", "C");
     int rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = fty_proto_encode_metric (NULL, 60, 5, "humidity", "ups", "45", "%");
+    msg = fty_proto_encode_metric (NULL, time (NULL), 5, "humidity", "ups", "45", "%");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = fty_proto_encode_metric (NULL, 60, 60, "temperature", "epdu", "25", "C");
+    msg = fty_proto_encode_metric (NULL, time (NULL), 60, "temperature", "epdu", "25", "C");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
 
-    msg = fty_proto_encode_metric (NULL, 60, 55, "realpower.default", "switch", "100", "W");
+    msg = fty_proto_encode_metric (NULL, time (NULL), 55, "realpower.default", "switch", "100", "W");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
@@ -286,7 +286,7 @@ fty_metric_cache_server_test (bool verbose)
     //      1 changed measurement
     // ===============================================
 
-    msg = fty_proto_encode_metric (NULL, 60, 29, "temperature", "epdu", "70", "C");
+    msg = fty_proto_encode_metric (NULL, time (NULL), 29, "temperature", "epdu", "70", "C");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (10);
