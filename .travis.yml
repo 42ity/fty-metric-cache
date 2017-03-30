@@ -41,6 +41,7 @@ matrix:
       apt:
         packages:
         - valgrind
+        - apport
   - env: BUILD_TYPE=valgrind CI_CZMQ_VER=4
     os: linux
     dist: trusty
@@ -51,8 +52,8 @@ matrix:
         - valgrind
         - git
         - apport
-        - asciidoc
-        - xmlto
+#        - asciidoc
+#        - xmlto
 
 addons:
   sources:
