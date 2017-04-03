@@ -1,18 +1,5 @@
-EXTRA_DIST += \
-	test_state_file
-
 AM_CPPFLAGS += \
 	-I$(srcdir)/src
 
 CLEANFILES += \
 	stderr.txt
-
-$(abs_builddir)/test_state_file: $(abs_srcdir)/test_state_file
-	@if [ "$@" != "$<" ]; then cp -pf "$<" "$@" ; fi
-
-check-local: $(abs_builddir)/test_state_file
-
-clean-local: clean-local-check
-.PHONY: clean-local-check
-clean-local-check:
-	@if [ "$(abs_builddir)" != "$(abs_srcdir)" ]; then rm -f $(abs_builddir)/test_state_file ; fi
