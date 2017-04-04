@@ -189,6 +189,17 @@ actor_commands_test (bool verbose)
     //  @selftest
     static const char* endpoint = "ipc://bios-smtp-server-test";
 
+    // Note: If your selftest reads SCMed fixture data, please keep it in
+    // src/selftest-ro; if your test creates filesystem objects, please
+    // do so under src/selftest-rw. They are defined below along with a
+    // usecase (asert) to make compilers happy.
+    const char *SELFTEST_DIR_RO = "src/selftest-ro";
+    const char *SELFTEST_DIR_RW = "src/selftest-rw";
+    assert (SELFTEST_DIR_RO);
+    assert (SELFTEST_DIR_RW);
+    // std::string str_SELFTEST_DIR_RO = std::string(SELFTEST_DIR_RO);
+    // std::string str_SELFTEST_DIR_RW = std::string(SELFTEST_DIR_RW);
+
     // malamute broker
     zactor_t *malamute = zactor_new (mlm_server, (void*) "Malamute");
     assert (malamute);
@@ -395,16 +406,19 @@ actor_commands_test (bool verbose)
     assert (fullpath == NULL);
 
     // CONFIGURE
+    char *test_state_file = zsys_sprintf ("%s/test_state_file", SELFTEST_DIR_RO);
+    assert (test_state_file != NULL);
     message = zmsg_new ();
     assert (message);
     zmsg_addstr (message, "CONFIGURE");
-    zmsg_addstr (message, "./test_state_file");
+    zmsg_addstr (message, test_state_file);
     rv = actor_commands (client, &message, data, &fullpath);
     assert (rv == 0);
     assert (message == NULL);
     assert (fullpath);
-    assert (streq (fullpath,"./test_state_file"));
+    assert (streq (fullpath, test_state_file));
     zstr_free (&fullpath);
+    zstr_free (&test_state_file);
 
     STDERR_EMPTY
 

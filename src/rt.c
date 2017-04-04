@@ -388,6 +388,17 @@ rt_test (bool verbose)
 {
     printf (" * rt: \n");
 
+    // Note: If your selftest reads SCMed fixture data, please keep it in
+    // src/selftest-ro; if your test creates filesystem objects, please
+    // do so under src/selftest-rw. They are defined below along with a
+    // usecase (asert) to make compilers happy.
+    const char *SELFTEST_DIR_RO = "src/selftest-ro";
+    const char *SELFTEST_DIR_RW = "src/selftest-rw";
+    assert (SELFTEST_DIR_RO);
+    assert (SELFTEST_DIR_RW);
+    // std::string str_SELFTEST_DIR_RO = std::string(SELFTEST_DIR_RO);
+    // std::string str_SELFTEST_DIR_RW = std::string(SELFTEST_DIR_RW);
+
     //  @selftest
 
     rt_t *self = rt_new ();
@@ -441,11 +452,14 @@ rt_test (bool verbose)
     assert (proto == NULL);
 
     // save/load
-    int rv = rt_save (self, "./test_state_file");
+    char *test_state_file = zsys_sprintf ("%s/test_state_file", SELFTEST_DIR_RW);
+    assert (test_state_file != NULL);
+    int rv = rt_save (self, test_state_file);
     assert (rv == 0);
     rt_t *loaded = rt_new ();
-    rv = rt_load (loaded, "./test_state_file");
+    rv = rt_load (loaded, test_state_file);
     assert (rv == 0);
+    zstr_free (&test_state_file);
 
     proto = rt_get (loaded, "ups", "temp");
     test_assert_proto (proto, "temp", "ups", "15", "C", 20);
