@@ -32,7 +32,7 @@
 #define str(x) #x
 
 static const char *ENDPOINT = "ipc://@/malamute";
-static const char *STATE_FILE = "/var/lib/bios/bios-agent-rt/state_file";
+static const char *STATE_FILE = "/var/lib/fty/fty-metric-cache/state_file";
 
 #define DEFAULT_LOG_LEVEL LOG_WARNING
 
