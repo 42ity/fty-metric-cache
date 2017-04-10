@@ -6,7 +6,7 @@ Installation model
     name - file name
 
     2. type
-    * systemd-tmpfiles  - install $(project.name) to /usr/lib/systemd/tmpfiles.d/
+    * systemd-tmpfiles  - install $(project.name) to /usr/lib/tmpfiles.d/
      -->
 
 <install>
