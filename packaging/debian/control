@@ -24,7 +24,7 @@ Maintainer:     fty-metric-cache Developers <eatonipcopensource@eaton.com>
 Standards-Version: 3.9.7
 Build-Depends: debhelper (>= 9),
     pkg-config,
-    libzmq3-dev,
+    libzmq5-dev,
     libczmq-dev,
     libmlm-dev,
     libfty-proto-dev,
@@ -43,7 +43,7 @@ Package: libfty-metric-cache-dev
 Architecture: any
 Section: libdevel
 Depends:
-    libzmq3-dev,
+    libzmq5-dev,
     libczmq-dev,
     libmlm-dev,
     libfty-proto-dev,
