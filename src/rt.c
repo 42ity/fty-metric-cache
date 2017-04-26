@@ -200,7 +200,6 @@ rt_load (rt_t *self, const char *fullpath)
     assert (chunk);
     zframe_t *frame = zframe_new (zchunk_data (chunk), zchunk_size (chunk));
     assert (frame);
-    zchunk_destroy (&chunk);
 
     zfile_close (file);
     zfile_destroy (&file);
@@ -231,6 +230,7 @@ rt_load (rt_t *self, const char *fullpath)
         }
         rt_put (self, &metric);
     }
+    zframe_destroy (&frame);
     zchunk_destroy (&chunk);
     return 0;
 }
