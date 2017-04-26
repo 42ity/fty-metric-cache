@@ -198,6 +198,9 @@ rt_load (rt_t *self, const char *fullpath)
 
     zchunk_t *chunk = zchunk_read (zfile_handle (file), cursize);
     assert (chunk);
+    zframe_t *frame = zframe_new (zchunk_data (chunk), zchunk_size (chunk));
+    assert (frame);
+    zchunk_destroy (&chunk);
 
     zfile_close (file);
     zfile_destroy (&file);
@@ -205,11 +208,20 @@ rt_load (rt_t *self, const char *fullpath)
     uint64_t offset = 0;
 
     while (offset < cursize) {
-        byte *prefix = zchunk_data (chunk) + offset;
-        byte *data = zchunk_data (chunk) + offset + sizeof (uint64_t);
+        byte *prefix = zframe_data (frame) + offset;
+        byte *data = zframe_data (frame) + offset + sizeof (uint64_t);
         offset += (uint64_t) *prefix +  sizeof (uint64_t);
 
-        zmsg_t *zmessage = zmsg_decode (data, (size_t) *prefix);
+        zmsg_t *zmessage;
+#if CZMQ_VERSION_MAJOR == 3
+        zmessage = zmsg_decode (data, (size_t) *prefix);
+#else
+        {
+            zframe_t *fr = zframe_new (data, (size_t) *prefix);
+            zmessage = zmsg_decode (fr);
+            zframe_destroy (&fr);
+        }
+#endif
         assert (zmessage);
         fty_proto_t *metric = fty_proto_decode (&zmessage); // zmessage destroyed
         if (! metric) {
@@ -263,19 +275,26 @@ rt_save (rt_t *self, const char *fullpath)
             zmsg_t *zmessage = fty_proto_encode (&duplicate); // duplicate destroyed here
             assert (zmessage);
 
+#if CZMQ_VERSION_MAJOR == 3
             byte *buffer = NULL;
             uint64_t size = zmsg_encode (zmessage, &buffer);
-            zmsg_destroy (&zmessage);
 
             assert (buffer);
             assert (size > 0);
+            zframe_t *frame = zframe_new (buffer, size);
+            free (buffer); buffer = NULL;
+#else
+            zframe_t *frame = zmsg_encode (zmessage);
+            uint64_t size = zframe_size (frame);
+#endif
+            zmsg_destroy (&zmessage);
 
             // prefix
             zchunk_extend (chunk, (const void *) &size, sizeof (uint64_t));
             // data
-            zchunk_extend (chunk, (const void *) buffer, size);
+            zchunk_extend (chunk, (const void *) zframe_data (frame), zframe_size (frame));
 
-            free (buffer); buffer = NULL;
+            zframe_destroy (&frame);
 
             metric = (fty_proto_t *) zhashx_next (device);
         }
