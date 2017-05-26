@@ -59,7 +59,7 @@ rt_destroy (rt_t **self_p)
     if (*self_p) {
         rt_t *self = *self_p;
 
-	    zhashx_destroy (&self->devices);
+        zhashx_destroy (&self->devices);
 
         free (self);
         *self_p = NULL;
