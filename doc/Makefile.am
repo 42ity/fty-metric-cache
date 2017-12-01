@@ -77,7 +77,7 @@ fty-metric-cache-cli.txt: $(top_srcdir)/src/fty_metric_cache_cli.c
 	"$(srcdir)/mkman" "fty_metric_cache_cli" "$(builddir)/fty-metric-cache-cli.txt" "$(srcdir)/.."
 
 
-clean:
+clean-local:
 	rm -f *.1 *.3 *.7 $(GENERATED_DOCS)
 
 doc: $(GENERATED_DOCS)
