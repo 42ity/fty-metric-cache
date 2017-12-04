@@ -1,6 +1,4 @@
 usr/bin/fty-metric-cache
-usr/share/man/man1/fty-metric-cache.1
 usr/bin/fty-metric-cache-cli
-usr/share/man/man1/fty-metric-cache-cli.1
 lib/systemd/system/fty-metric-cache.service
 
