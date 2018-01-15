@@ -107,6 +107,7 @@ make %{_smp_mflags}
 
 %install
 make install DESTDIR=%{buildroot} %{?_smp_mflags}
+mkdir -p %{buildroot}/%{_sysconfdir}/fty-metric-cache
 
 # remove static libraries
 find %{buildroot} -name '*.a' | xargs rm -f
