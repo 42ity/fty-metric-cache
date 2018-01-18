@@ -1,3 +1,5 @@
+# NOTE: File was edited below (to install the delivered etc dir in the build root)
+
 #
 #    fty-metric-cache - Knows current values of any METRIC in the system
 #
