@@ -1,3 +1,5 @@
+# NOTE: File was edited below (to install the delivered etc dir in the build root)
+
 #
 #    fty-metric-cache - Knows current values of any METRIC in the system
 #
@@ -115,6 +117,7 @@ find %{buildroot} -name '*.la' | xargs rm -f
 
 %files
 %defattr(-,root,root)
+%doc README.md
 %{_bindir}/fty-metric-cache
 %{_mandir}/man1/fty-metric-cache*
 %{_bindir}/fty-metric-cache-cli

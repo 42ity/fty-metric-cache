@@ -51,6 +51,7 @@ EXTRA_DIST += \
     src/actor_commands.h \
     src/rt.h \
     src/mailbox.h \
+    README.md \
     src/fty_metric_cache_classes.h
 
 # NOTE: this "include" syntax is not a "make" but an "autotools" keyword,
