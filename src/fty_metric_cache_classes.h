@@ -45,6 +45,9 @@ typedef struct _actor_commands_t actor_commands_t;
 #endif
 #ifndef RT_T_DEFINED
 typedef struct _rt_t rt_t;
+struct _rt_t {
+    zhashx_t *devices;      // hash of hashes ("device name", ("measurement", fty_proto_t*))
+};
 #define RT_T_DEFINED
 #endif
 #ifndef MAILBOX_T_DEFINED
