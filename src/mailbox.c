@@ -52,6 +52,9 @@ static void dump_hash_of_metrics(zhashx_t *hash, zmsg_t *reply,char *filter){
             metric = (fty_proto_t *) zhashx_next (hash);
         }
     }
+    if(NULL!=rex){
+        zrex_destroy(&rex);
+    }
 }
 
 //  --------------------------------------------------------------------------
@@ -142,7 +145,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 //loop on device list
                 while (device) {
                     char* device_name=(char *) zhashx_cursor (data->devices);
-                    zlist_append(device_name_lst,(void*)device_name);
+                    zlist_push(device_name_lst,(void*)device_name);
                     device = (zhashx_t *) zhashx_next (data->devices);
                 }
                 char*device_name = (char *) zlist_first (device_name_lst);
