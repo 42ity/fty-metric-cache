@@ -32,7 +32,7 @@
 const char *endpoint = "ipc://@/malamute";
 zpoller_t *poller = NULL;
 
-void print_device(const char *device, const char* filter,mlm_client_t *cli){
+void print_device(const char *device, const char* filter, mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
     zmsg_addstr (send, "GET");
