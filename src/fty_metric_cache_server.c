@@ -227,7 +227,7 @@ fty_metric_cache_server_test (bool verbose)
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
-
+       
     // ===============================================
     // Test case #1:
     //      GET ups
@@ -277,7 +277,7 @@ fty_metric_cache_server_test (bool verbose)
     assert (encoded == NULL);
 
     zmsg_destroy (&reply);
-
+    
     // ===============================================
     // Test case #2:
     //      1. Change epdu data
@@ -443,7 +443,180 @@ fty_metric_cache_server_test (bool verbose)
     assert (encoded == NULL);
 
     zmsg_destroy (&reply);
+    
+        // ===============================================
+    // Test case #5:
+    //      GET ups-.*
+    // Expected:
+    //      2 measurements
+    // ===============================================
+    {
+    msg = fty_proto_encode_metric (NULL, time (NULL), 5, "temperature1", "ups-1", "1", "C");
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    zclock_sleep (100);
+    
+    msg = fty_proto_encode_metric (NULL, time (NULL), 5, "temperature2", "ups-2", "2", "C");
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    zclock_sleep (100);
+    
+    zmsg_t *send = zmsg_new ();
+    zmsg_addstr (send, "12345");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "ups-.*");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+    zmsg_t *reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
 
+    char *uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "12345"));
+    zstr_free (&uuid);
+
+    char *command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    char *element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "ups-.*"));
+    zstr_free (&element);
+
+    zmsg_t *encoded = zmsg_popmsg (reply);
+    assert (encoded);
+
+    fty_proto_t *proto = fty_proto_decode (&encoded);
+    test_assert_proto (proto, "temperature1", "ups-1", "1", "C", 5);
+    fty_proto_destroy (&proto);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded);
+    proto = fty_proto_decode (&encoded);
+    test_assert_proto (proto, "temperature2", "ups-2", "2", "C", 5);
+    fty_proto_destroy (&proto);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);
+
+    zmsg_destroy (&reply);
+    }
+    
+   // ===============================================
+    // Test case #6:
+    //      GET ups-1 temperature1.$
+    // Expected:
+    //      1 measurements
+    // ===============================================
+    {
+    msg = fty_proto_encode_metric (NULL, time (NULL), 5, "temperature10", "ups-1", "10", "C");
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    zclock_sleep (100);
+    
+    msg = fty_proto_encode_metric (NULL, time (NULL), 5, "temperature100", "ups-1", "100", "C");
+    rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
+    assert (rv == 0);
+    zclock_sleep (100);
+    
+    zmsg_t *send = zmsg_new ();
+    zmsg_addstr (send, "12345");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "ups-1");
+    zmsg_addstr (send, "temperature1.$");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+    zmsg_t *reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
+
+    char *uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "12345"));
+    zstr_free (&uuid);
+
+    char *command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    char *element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "ups-1"));
+    zstr_free (&element);
+
+    zmsg_t *encoded = zmsg_popmsg (reply);
+    assert (encoded);
+
+    fty_proto_t *proto = fty_proto_decode (&encoded);
+    test_assert_proto (proto, "temperature10", "ups-1", "10", "C", 5);
+    fty_proto_destroy (&proto);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);
+
+    zmsg_destroy (&reply);
+    }
+    
+    // ===============================================
+    // Test case #7:
+    //      GET ups-.$ temperature.$
+    // Expected:
+    //      2 measurements
+    // ===============================================
+    {
+    
+    zmsg_t *send = zmsg_new ();
+    zmsg_addstr (send, "12345");
+    zmsg_addstr (send, "GET");
+    zmsg_addstr (send, "ups-.$");
+    zmsg_addstr (send, "temperature.$");
+    rv = mlm_client_sendto (ui, "agent-rt", RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
+    assert (rv == 0);
+    zmsg_t *reply = mlm_client_recv (ui);
+    assert (reply);
+    assert (streq (mlm_client_subject (ui), RFC_RT_DATA_SUBJECT));
+    zmsg_print (reply);
+
+    char *uuid = zmsg_popstr (reply);
+    assert (uuid);
+    assert (streq (uuid, "12345"));
+    zstr_free (&uuid);
+
+    char *command = zmsg_popstr (reply);
+    assert (command);
+    assert (streq (command, "OK"));
+    zstr_free (&command);
+
+    char *element = zmsg_popstr (reply);
+    assert (element);
+    assert (streq (element, "ups-.$"));
+    zstr_free (&element);
+
+    zmsg_t *encoded = zmsg_popmsg (reply);
+    assert (encoded);
+
+    fty_proto_t *proto = fty_proto_decode (&encoded);
+    test_assert_proto (proto, "temperature1", "ups-1", "1", "C", 5);
+    fty_proto_destroy (&proto);
+     
+    encoded = zmsg_popmsg (reply);
+    assert (encoded);
+    proto = fty_proto_decode (&encoded);
+    test_assert_proto (proto, "temperature2", "ups-2", "2", "C", 5);
+    fty_proto_destroy (&proto);
+
+    encoded = zmsg_popmsg (reply);
+    assert (encoded == NULL);
+
+    zmsg_destroy (&reply);
+    }
+    
 
     zactor_destroy (&rt);
     mlm_client_destroy (&ui);

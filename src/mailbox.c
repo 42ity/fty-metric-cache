@@ -29,6 +29,34 @@
 #include "fty_metric_cache_classes.h"
 
 #define ENDPOINT "ipc://@/malamute"
+static void dump_hash_of_metrics(zhashx_t *hash, zmsg_t *reply,char *filter){
+    uint64_t now_s = time(NULL);
+    zrex_t *rex=NULL;
+    if(filter!=NULL){
+         rex = zrex_new (filter);
+         if(!zrex_valid(rex)){
+             zrex_destroy(&rex);
+             rex=NULL;
+         }
+    }
+    if (hash) {
+        fty_proto_t *metric = (fty_proto_t *) zhashx_first (hash);
+        while (metric) {
+            if ( fty_proto_time(metric) + fty_proto_ttl(metric) > now_s ) {
+                if(NULL==rex || zrex_matches(rex,fty_proto_type(metric))){
+                    fty_proto_t *copy = fty_proto_dup (metric);
+                    zmsg_t *encoded = fty_proto_encode (&copy);
+                    zmsg_addmsg (reply, &encoded);
+                }
+            }
+            metric = (fty_proto_t *) zhashx_next (hash);
+        }
+    }
+    if(NULL!=rex){
+        zrex_destroy(&rex);
+    }
+}
+
 //  --------------------------------------------------------------------------
 //  Perform mailbox deliver protocol
 void
@@ -37,7 +65,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
     assert (client);
     assert (msg_p);
     assert (data);
-
+    
     if (!*msg_p)
         return;
     zmsg_t *msg = *msg_p;
@@ -99,26 +127,42 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                     mlm_client_sender (client), mlm_client_subject (client));
             return;
         }
+        //echk optional filter
+        char *filter=zmsg_popstr(msg);
         zmsg_t *reply = zmsg_new ();
         zmsg_addstr (reply, uuid);
         zmsg_addstr (reply, "OK");
         zmsg_addstr (reply, element);
-
         zhashx_t *hash = rt_get_element (data, element);
-        uint64_t now_s = time(NULL);
-        if (hash) {
-            fty_proto_t *metric = (fty_proto_t *) zhashx_first (hash);
-            while (metric) {
-                if ( fty_proto_time(metric) + fty_proto_ttl(metric) > now_s ) {
-                    fty_proto_t *copy = fty_proto_dup (metric);
-                    zmsg_t *encoded = fty_proto_encode (&copy);
-                    zmsg_addmsg (reply, &encoded);
+        if(hash!=NULL){
+            dump_hash_of_metrics(hash,reply,filter);
+        }else{
+            //trying to process element as a regex ..
+            zrex_t *rex = zrex_new (element);
+            if(zrex_valid(rex)){
+                zlist_t* device_name_lst=zlist_new();
+                zhashx_t *device = (zhashx_t *) zhashx_first (data->devices);
+                //loop on device list
+                while (device) {
+                    char* device_name=(char *) zhashx_cursor (data->devices);
+                    zlist_push(device_name_lst,(void*)device_name);
+                    device = (zhashx_t *) zhashx_next (data->devices);
                 }
-                metric = (fty_proto_t *) zhashx_next (hash);
+                char*device_name = (char *) zlist_first (device_name_lst);
+                //loop on device_name list
+                while (device_name) {
+                    if(zrex_matches(rex,device_name)){
+                        //regex match !
+                        dump_hash_of_metrics(rt_get_element (data, device_name),reply,filter);
+                    }
+                    device_name = (char *) zlist_next (device_name_lst);
+                }
+                zlist_destroy(&device_name_lst);
             }
+            zrex_destroy(&rex);
         }
-
         zstr_free (&element);
+        if(filter!=NULL)zstr_free (&filter);
 
         int rv = mlm_client_sendto (client, mlm_client_sender(client), RFC_RT_DATA_SUBJECT, NULL, 5000, &reply);
 

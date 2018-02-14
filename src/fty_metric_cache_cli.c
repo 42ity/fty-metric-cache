@@ -32,11 +32,14 @@
 const char *endpoint = "ipc://@/malamute";
 zpoller_t *poller = NULL;
 
-void print_device(const char *device, mlm_client_t *cli){
+void print_device(const char *device, const char* filter, mlm_client_t *cli){
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "");
     zmsg_addstr (send, "GET");
     zmsg_addstr (send, device);
+    if(NULL!=filter){
+        zmsg_addstr (send, filter);
+    }
 
     int rv = mlm_client_sendto (cli, FTY_METRIC_CACHE_MAILBOX, RFC_RT_DATA_SUBJECT, NULL, 5000, &send);
     assert (rv == 0);
@@ -90,10 +93,12 @@ int main (int argc, char *argv [])
              || streq (argv [argn], "-h"))
         {
             puts ("agent-rt-cli [options]");
-            puts ("agent-rt-cli [device]    print all information about the device");
-            puts ("  --list / -l            print list of devices known to the agent");
-            puts ("  --verbose / -v         verbose output");
-            puts ("  --help / -h            this information");
+            puts ("agent-rt-cli device [filter] print all information about the device");
+            puts ("             device          device name or a regex");
+            puts ("             [filter]        regex filter to select specific metric name");
+            puts ("  --list / -l                print list of devices known to the agent");
+            puts ("  --verbose / -v             verbose output");
+            puts ("  --help / -h                this information");
             break;
         }
         else
@@ -110,7 +115,8 @@ int main (int argc, char *argv [])
             break;
         }
         else {
-            print_device(argv [argn], client);
+            char* filter=(argn==(argc-2))?argv[argn+1]:NULL;
+            print_device(argv [argn], filter, client);
             break;
         }
     }

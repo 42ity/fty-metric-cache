@@ -97,17 +97,18 @@ where
 The USER peer sends the following message using MAILBOX SEND to
 FTY-METRIC-CACHE-SERVER ("fty-metric-cache") peer:
 
-* zuuid/GET/element - request current metrics for asset 'element'
+* zuuid/GET/element/[filter] - request current metrics for asset 'element'
 
 where
 * '/' indicates a multipart string message
-* 'element' MUST be name of existing asset
+* 'element' MUST be name of existing asset or a regex about asset name 
+* 'filter' is an optional parameter which filter as a regex type of metric
 * subject of the message MUST be "latest-rt-data".
 
 The FTY-METRIC-CACHE-SERVER peer MUST respond with this  message back to USER
 peer using MAILBOX SEND.
 
-* zuuid/OK/GET/metric-1/.../metric-n
+* zuuid/OK/GET/element/metric-1/.../metric-n
 
 where
 * '/' indicates a multipart frame message

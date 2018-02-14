@@ -30,9 +30,7 @@
 
 //  Structure of our class
 
-struct _rt_t {
-    zhashx_t *devices;      // hash of hashes ("device name", ("measurement", fty_proto_t*))
-};
+
 
 //  --------------------------------------------------------------------------
 //  Create a new rt
@@ -122,7 +120,7 @@ rt_get_element (rt_t *self, const char *element)
 {
     assert (self);
     assert (element);
-
+    
     return (zhashx_t *) zhashx_lookup (self->devices, element);
 }
 
