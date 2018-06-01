@@ -75,9 +75,11 @@ DartConfiguration.tcl
 install_manifest.txt
 Testing/
 CMakeLists.txt
+
+# CMake in general
 builds/cmake/
-*.cmake
 CMake*
+*.cmake
 
 # Repositories downloaded by CI integration scripts
 libzmq/
