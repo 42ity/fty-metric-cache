@@ -4,7 +4,7 @@
     Runs all private classes selftests.
 
     -------------------------------------------------------------------------
-    Copyright (C) 2014 - 2017 Eaton
+    Copyright (C) 2014 - 2018 Eaton
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,13 +35,17 @@
 //
 
 void
-fty_metric_cache_private_selftest (bool verbose)
+fty_metric_cache_private_selftest (bool verbose, const char *subtest)
 {
 // Tests for stable private classes:
-    logger_test (verbose);
-    actor_commands_test (verbose);
-    rt_test (verbose);
-    mailbox_test (verbose);
+    if (streq (subtest, "$ALL") || streq (subtest, "logger_test"))
+        logger_test (verbose);
+    if (streq (subtest, "$ALL") || streq (subtest, "actor_commands_test"))
+        actor_commands_test (verbose);
+    if (streq (subtest, "$ALL") || streq (subtest, "rt_test"))
+        rt_test (verbose);
+    if (streq (subtest, "$ALL") || streq (subtest, "mailbox_test"))
+        mailbox_test (verbose);
 }
 /*
 ################################################################################

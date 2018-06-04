@@ -1,7 +1,7 @@
 /*  =========================================================================
     fty_metric_cache_classes - private header file
 
-    Copyright (C) 2014 - 2017 Eaton
+    Copyright (C) 2014 - 2018 Eaton
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,9 +45,12 @@ typedef struct _actor_commands_t actor_commands_t;
 #endif
 #ifndef RT_T_DEFINED
 typedef struct _rt_t rt_t;
+/* Note: The definition below disappeared with a recent re-generation */
+/*
 struct _rt_t {
     zhashx_t *devices;      // hash of hashes ("device name", ("measurement", fty_proto_t*))
 };
+*/
 #define RT_T_DEFINED
 #endif
 #ifndef MAILBOX_T_DEFINED
@@ -87,7 +90,7 @@ FTY_METRIC_CACHE_PRIVATE void
 
 //  Self test for private classes
 FTY_METRIC_CACHE_PRIVATE void
-    fty_metric_cache_private_selftest (bool verbose);
+    fty_metric_cache_private_selftest (bool verbose, const char *subtest);
 
 #endif // FTY_METRIC_CACHE_BUILD_DRAFT_API
 

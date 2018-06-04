@@ -3,7 +3,7 @@
 #
 #    fty-metric-cache - Knows current values of any METRIC in the system
 #
-#    Copyright (C) 2014 - 2017 Eaton
+#    Copyright (C) 2014 - 2018 Eaton
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -107,6 +107,7 @@ sh autogen.sh
 %{configure} --enable-drafts=%{DRAFTS} --with-systemd-units
 make %{_smp_mflags}
 
+# Note: this was manually amended to deliver the /etc dir for the component
 %install
 make install DESTDIR=%{buildroot} %{?_smp_mflags}
 mkdir -p %{buildroot}/%{_sysconfdir}/fty-metric-cache
