@@ -1,5 +1,7 @@
 # This is a skeleton created by zproject.
 # You can add hand-written code here.
+### Note: Customized after generation; take care upon regens
+
 save.xml
 stderr.txt
 
@@ -32,10 +34,10 @@ src/fty_metric_cache_selftest
 *.app
 core
 
- # Distcheck workspace and archives
-fty-metric-cache-1.0.0/
-fty-metric-cache-1.0.0.tar.gz
-fty-metric-cache-1.0.0.zip
+# Distcheck workspace and archives
+fty-metric-cache-*/
+fty-metric-cache-*.tar.gz
+fty-metric-cache-*.zip
 
 # Man pages
 doc/*.1
@@ -74,12 +76,14 @@ compile_commands.json
 DartConfiguration.tcl
 install_manifest.txt
 Testing/
-CMakeLists.txt
+
+# CMake in general
 builds/cmake/
-*.cmake
 CMake*
+*.cmake
 
 # Repositories downloaded by CI integration scripts
+libsodium/
 libzmq/
 czmq/
 malamute/
@@ -112,7 +116,7 @@ src/app/gen/
 src/app/obj/
 src/app/local.properties
 
-# Android -dependencies
+# Android - dependencies
 src/app/jni/output
 
 # Python build directory
@@ -134,9 +138,13 @@ bindings/qt/selftest/selftest
 *.bak
 .test*
 
+# Netbeans directory
+nbproject/
+
 # editor backups
 *~
 
-# configuration files, as they are not used here and the no_config flag in project.xml is broken
+# configuration files AND their .in templates, as they are not used here
+# and the no_config flag in project.xml is broken
 src/fty-metric-cache.cfg.in
 src/fty-metric-cache.cfg
