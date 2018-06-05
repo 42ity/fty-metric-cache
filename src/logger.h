@@ -1,5 +1,6 @@
 /*  =========================================================================
     logger - logging api
+    Note: This file was manually amended, see below
 
     Copyright (C) 2014 - 2017 Eaton
 
@@ -96,7 +97,8 @@ FTY_METRIC_CACHE_EXPORT int
         log_macro(LOG_CRIT, __VA_ARGS__)
 
 //  Self test of this class.
-FTY_METRIC_CACHE_EXPORT void
+//  Note: Keep this definition in sync with fty_metric_cache_classes.h
+FTY_METRIC_CACHE_PRIVATE void
     logger_test (bool verbose);
 
 //  @end

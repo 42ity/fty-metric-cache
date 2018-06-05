@@ -1,5 +1,6 @@
 /*  =========================================================================
     rt - Metric cache structure
+    Note: This file was manually amended, see below
 
     Copyright (C) 2014 - 2017 Eaton
 
@@ -81,8 +82,8 @@ FTY_METRIC_CACHE_EXPORT char *
 FTY_METRIC_CACHE_EXPORT void
     rt_destroy (rt_t **self_p);
 
-//  Self test of this class
-FTY_METRIC_CACHE_EXPORT void
+//  Note: Keep this definition in sync with fty_metric_cache_classes.h
+FTY_METRIC_CACHE_PRIVATE void
     rt_test (bool verbose);
 
 //  @end

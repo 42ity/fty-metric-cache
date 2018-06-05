@@ -1,5 +1,6 @@
 /*  =========================================================================
     mailbox - mailbox deliver
+    Note: This file was manually amended, see below
 
     Copyright (C) 2014 - 2017 Eaton
 
@@ -70,8 +71,8 @@ extern "C" {
 FTY_METRIC_CACHE_EXPORT void
     mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data);
 
-//  Self test of this class
-FTY_METRIC_CACHE_EXPORT void
+//  Note: Keep this definition in sync with fty_metric_cache_classes.h
+FTY_METRIC_CACHE_PRIVATE void
     mailbox_test (bool verbose);
 
 //  @end

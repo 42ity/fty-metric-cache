@@ -1,5 +1,6 @@
 /*  =========================================================================
     actor_commands - actor commands
+    Note: This file was manually amended, see below
 
     Copyright (C) 2014 - 2017 Eaton
 
@@ -58,8 +59,8 @@ FTY_METRIC_CACHE_EXPORT int
             rt_t *data,
             char **fullpath);
 
-//  Self test of this class
-FTY_METRIC_CACHE_EXPORT void
+//  Note: Keep this definition in sync with fty_metric_cache_classes.h
+FTY_METRIC_CACHE_PRIVATE void
     actor_commands_test (bool verbose);
 
 //  @end
