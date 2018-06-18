@@ -139,7 +139,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
         }else{
             //trying to process element as a regex ..
             //enforce regex
-            char *element_regex = malloc(strlen(element)+3);
+            char *element_regex = (char*) malloc(strlen(element)+3);
             sprintf(element_regex,"^%s$",element);
             zrex_t *rex = zrex_new (element_regex);
             if(zrex_valid(rex)){
