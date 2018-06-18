@@ -127,7 +127,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                     mlm_client_sender (client), mlm_client_subject (client));
             return;
         }
-        //echk optional filter
+        //check optional filter
         char *filter=zmsg_popstr(msg);
         zmsg_t *reply = zmsg_new ();
         zmsg_addstr (reply, uuid);
@@ -138,7 +138,10 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
             dump_hash_of_metrics(hash,reply,filter);
         }else{
             //trying to process element as a regex ..
-            zrex_t *rex = zrex_new (element);
+            //enforce regex
+            char *element_regex = malloc(strlen(element)+3);
+            sprintf(element_regex,"^%s$",element);
+            zrex_t *rex = zrex_new (element_regex);
             if(zrex_valid(rex)){
                 zlist_t* device_name_lst=zlist_new();
                 zhashx_t *device = (zhashx_t *) zhashx_first (data->devices);
@@ -160,6 +163,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
                 zlist_destroy(&device_name_lst);
             }
             zrex_destroy(&rex);
+            free(element_regex);
         }
         zstr_free (&element);
         if(filter!=NULL)zstr_free (&filter);
