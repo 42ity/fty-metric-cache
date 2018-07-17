@@ -33,6 +33,7 @@
 #include <czmq.h>
 #include <malamute.h>
 #include <ftyproto.h>
+#include <fty-log/fty_logger.h>
 
 //  FTY_METRIC_CACHE version macros for compile-time API detection
 #define FTY_METRIC_CACHE_VERSION_MAJOR 1
