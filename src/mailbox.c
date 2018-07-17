@@ -339,7 +339,7 @@ mailbox_test (bool verbose)
     assert (reply);
     mailbox_perform (mailbox, &reply, data);
 
-    zsys_debug ("Waiting in zpoller for 5000ms");
+    log_debug ("Waiting in zpoller for 5000ms");
     zpoller_t *poller = zpoller_new (mlm_client_msgpipe (ui), NULL);
     void *which = zpoller_wait (poller, 5000);
     assert (which == NULL);
@@ -396,5 +396,5 @@ mailbox_test (bool verbose)
     zactor_destroy (&server);
 
     //  @end
-    printf ("OK\n");
+    log_info ("OK\n");
 }

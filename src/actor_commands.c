@@ -168,7 +168,7 @@ actor_commands (
     uint64_t sz = ftell (fp);\
     fclose (fp);\
     if (sz > 0)\
-        printf("STDERR_EMPTY() check failed, please review the stderr.txt in workspace root\n");\
+        log_error("STDERR_EMPTY() check failed, please review the stderr.txt in workspace root\n");\
     assert (sz == 0);\
     }
 
@@ -178,7 +178,7 @@ actor_commands (
     uint64_t sz = ftell (fp);\
     fclose (fp);\
     if (sz == 0)\
-        printf("STDERR_NON_EMPTY() check failed\n");\
+        log_error("STDERR_NON_EMPTY() check failed\n");\
     assert (sz > 0);\
     }
 
@@ -433,5 +433,5 @@ actor_commands_test (bool verbose)
     zactor_destroy (&malamute);
 
     //  @end
-    printf ("OK\n");
+    log_info ("OK\n");
 }

@@ -237,7 +237,7 @@ rt_load (rt_t *self, const char *fullpath)
         fty_proto_t *metric = fty_proto_decode (&zmessage); // zmessage destroyed
         if (! metric) {
             // state file is broken
-            zsys_error ("state file '%s' is broken", fullpath);
+            log_error ("state file '%s' is broken", fullpath);
             break;
         }
         rt_put (self, &metric);
@@ -351,11 +351,11 @@ rt_print (rt_t *self)
     assert (self);
     zhashx_t *device = (zhashx_t *) zhashx_first (self->devices);
     while (device) {
-        zsys_debug ("%s", (const char *) zhashx_cursor (self->devices));
+        printf ("%s", (const char *) zhashx_cursor (self->devices));
 
         fty_proto_t *metric = (fty_proto_t *) zhashx_first (device);
         while (metric) {
-            zsys_debug ("\t%s  -  %" PRIu64" %s %s %s %s %" PRIu32,
+            printf ("\t%s  -  %" PRIu64" %s %s %s %s %" PRIu32,
                     (const char *) zhashx_cursor (device),
                     fty_proto_time (metric),
                     fty_proto_type (metric),
@@ -585,7 +585,7 @@ rt_test (bool verbose)
     metric = test_metric_new ("load.input", "switch", "1000", "kV", 21);
     rt_put (self, &metric);
 
-    zsys_debug ("Sleeping 9500 ms");
+    log_debug ("Sleeping 9500 ms");
     zclock_sleep (9500);
     rt_purge (self);
 
@@ -608,7 +608,7 @@ rt_test (bool verbose)
     proto = rt_get (self, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
 
-    zsys_debug ("Sleeping 12600 ms");
+    log_debug ("Sleeping 12600 ms");
     zclock_sleep (12600);
     rt_purge (self);
 
@@ -628,7 +628,7 @@ rt_test (bool verbose)
     proto = rt_get (self, "switch", "amperes");
     test_assert_proto (proto, "amperes", "switch", "50", "A", 30);
 
-    zsys_debug ("Sleeping 9000 ms");
+    log_debug ("Sleeping 9000 ms");
     zclock_sleep (9000);
     rt_purge (self);
 
@@ -654,5 +654,5 @@ rt_test (bool verbose)
     rt_destroy (&self);
 
     //  @end
-    printf ("OK\n");
+    log_info ("OK\n");
 }

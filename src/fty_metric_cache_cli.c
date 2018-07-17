@@ -77,13 +77,13 @@ int main (int argc, char *argv [])
 
     mlm_client_t *client = mlm_client_new ();
     if ( !client ) {
-        zsys_error ("agent-rt-cli:\tlm_client_new memory error");
+        log_error ("agent-rt-cli:\tlm_client_new memory error");
         return -1;
     }
 
     int rv = mlm_client_connect (client, endpoint, 1000, "CLI");
     if ( rv == -1 ) {
-        zsys_error ("agent-rt-cli:\tCannot connect to malamute on '%s'", endpoint);
+        log_error ("agent-rt-cli:\tCannot connect to malamute on '%s'", endpoint);
         mlm_client_destroy (&client);
         return -1;
     }
@@ -125,7 +125,7 @@ int main (int argc, char *argv [])
     if (verbose)
         ftylog_setVeboseMode(ftylog_getInstance());
 
-    zsys_info ("agent_rt_cli - Command line interface for agent-rt");
+    log_info ("agent_rt_cli - Command line interface for agent-rt");
 
     zmsg_t *msg = reciver (client, 1000);
     if (msg) {
@@ -135,10 +135,10 @@ int main (int argc, char *argv [])
         char *reply = NULL;
         if(streq(command, "LIST")){
             reply = zmsg_popstr (msg);
-            printf ("%s", reply);
+            log_debug ("%s", reply);
             free (reply);
         }else{
-            printf("Device: %s\n", command);
+            log_debug ("Device: %s\n", command);
             char _bufftime[sizeof "YYYY-MM-DDTHH:MM:SSZ"];
             zmsg_t *msg_part = zmsg_popmsg(msg);
             fty_proto_t *fty_p_element;
@@ -146,7 +146,7 @@ int main (int argc, char *argv [])
                 fty_p_element = fty_proto_decode(&msg_part);
                 uint64_t _time = fty_proto_time (fty_p_element);
                 strftime(_bufftime, sizeof _bufftime, "%FT%TZ", gmtime((const time_t*)&_time));
-                printf("%s(ttl=%" PRIu32"s) %20s@%s = %s%s\n",
+                log_debug ("%s(ttl=%" PRIu32"s) %20s@%s = %s%s\n",
                         _bufftime,
                         fty_proto_ttl (fty_p_element),
                         fty_proto_type (fty_p_element),
@@ -165,7 +165,7 @@ int main (int argc, char *argv [])
         zclock_sleep (100);
     }
     else
-        zsys_error ("No agent response");
+        log_error ("No agent response");
 
     mlm_client_destroy (&client);
     return 0;

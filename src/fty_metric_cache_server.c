@@ -188,7 +188,6 @@ fty_metric_cache_server_test (bool verbose)
 {
     static const char* endpoint = "inproc://fty-metric-cache-server-test";
 
-    printf (" * fty_metric_cache_server: ");
     ftylog_setInstance("fty_metric_cache_server","");
 
     if (verbose)
@@ -342,7 +341,7 @@ fty_metric_cache_server_test (bool verbose)
     //      0 measurements
     //      0 measurements
     // ===============================================
-    zsys_debug ("Sleeping 30500 miliseconds");
+    log_debug ("Sleeping 30500 miliseconds");
     zclock_sleep (30500);
 
     send = zmsg_new ();
@@ -414,7 +413,7 @@ fty_metric_cache_server_test (bool verbose)
     // Expected:
     //      0 measurements
     // ===============================================
-    zsys_debug ("Sleeping 30500 miliseconds");
+    log_debug ("Sleeping 30500 miliseconds");
     zclock_sleep (30500);
 
     send = zmsg_new ();
@@ -627,5 +626,5 @@ fty_metric_cache_server_test (bool verbose)
     mlm_client_destroy (&producer);
     zactor_destroy (&server);
     //  @end
-    printf ("OK\n");
+    log_info ("OK\n");
 }
