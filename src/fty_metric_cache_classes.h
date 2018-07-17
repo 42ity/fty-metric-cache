@@ -37,10 +37,6 @@
 //  Extra headers
 
 //  Opaque class structures to allow forward references
-#ifndef LOGGER_T_DEFINED
-typedef struct _logger_t logger_t;
-#define LOGGER_T_DEFINED
-#endif
 #ifndef ACTOR_COMMANDS_T_DEFINED
 typedef struct _actor_commands_t actor_commands_t;
 #define ACTOR_COMMANDS_T_DEFINED
@@ -61,18 +57,12 @@ typedef struct _mailbox_t mailbox_t;
 
 //  Internal API
 
-#include "logger.h"
 #include "actor_commands.h"
 #include "rt.h"
 #include "mailbox.h"
 
 //  *** To avoid double-definitions, only define if building without draft ***
 #ifndef FTY_METRIC_CACHE_BUILD_DRAFT_API
-
-//  *** Draft method, defined for internal use only ***
-//  Self test of this class.
-FTY_METRIC_CACHE_PRIVATE void
-    logger_test (bool verbose);
 
 //  *** Draft method, defined for internal use only ***
 //  Self test of this class.

@@ -65,7 +65,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
     assert (client);
     assert (msg_p);
     assert (data);
-    
+
     if (!*msg_p)
         return;
     zmsg_t *msg = *msg_p;
@@ -228,7 +228,10 @@ mailbox_test (bool verbose)
 {
     static const char* endpoint = "inproc://fty-metric-cache-mailbox-test";
 
-    printf (" * mailbox: ");
+    ftylog_setInstance("mailbox","");
+
+    if (verbose)
+        ftylog_setVeboseMode(ftylog_getInstance());
     //  @selftest
 
     // Malamute

@@ -185,7 +185,12 @@ actor_commands (
 void
 actor_commands_test (bool verbose)
 {
-    printf (" * actor_commands: ");
+    ftylog_setInstance("actor_commands_test","");
+
+    // Since this test depends on nothing being written to stderr,
+    // enforce LOG_ERROR log level
+    ftylog_setLogLevelWarning(ftylog_getInstance());
+
     //  @selftest
     static const char* endpoint = "ipc://bios-smtp-server-test";
 

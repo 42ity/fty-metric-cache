@@ -120,7 +120,7 @@ rt_get_element (rt_t *self, const char *element)
 {
     assert (self);
     assert (element);
-    
+
     return (zhashx_t *) zhashx_lookup (self->devices, element);
 }
 
@@ -437,7 +437,10 @@ test_assert_proto (
 void
 rt_test (bool verbose)
 {
-    printf (" * rt: \n");
+    ftylog_setInstance("rt_test","");
+
+    if (verbose)
+        ftylog_setVeboseMode(ftylog_getInstance());
 
     // Note: If your selftest reads SCMed fixture data, please keep it in
     // src/selftest-ro; if your test creates filesystem objects, please

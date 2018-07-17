@@ -61,7 +61,6 @@
             />
     </use>
 
-    <class name = "logger"          private = "1">Logging api</class>
     <class name = "actor commands"  private = "1">Actor commands</class>
     <class name = "rt"              private = "1">Metric cache structure</class>
     <class name = "mailbox"         private = "1">Mailbox deliver</class>

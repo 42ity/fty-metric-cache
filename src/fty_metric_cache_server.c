@@ -74,13 +74,13 @@ fty_metric_cache_server (zsock_t *pipe, void *args)
 
     mlm_client_t *client = mlm_client_new ();
     if (!client) {
-        log_critical ("mlm_client_new () failed");
+        log_fatal ("mlm_client_new () failed");
         return;
     }
 
     zpoller_t *poller = zpoller_new (pipe, mlm_client_msgpipe (client), NULL);
     if (!poller) {
-        log_critical ("zpoller_new () failed");
+        log_fatal ("zpoller_new () failed");
         mlm_client_destroy (&client);
         return;
     }
@@ -128,7 +128,7 @@ fty_metric_cache_server (zsock_t *pipe, void *args)
 
         // paranoid non-destructive assertion of a twisted mind
         if (which != mlm_client_msgpipe (client)) {
-            log_critical ("which was checked for NULL, pipe and now should have been `mlm_client_msgpipe (client)` but is not.");
+            log_fatal ("which was checked for NULL, pipe and now should have been `mlm_client_msgpipe (client)` but is not.");
             continue;
         }
 
@@ -189,6 +189,10 @@ fty_metric_cache_server_test (bool verbose)
     static const char* endpoint = "inproc://fty-metric-cache-server-test";
 
     printf (" * fty_metric_cache_server: ");
+    ftylog_setInstance("fty_metric_cache_server","");
+
+    if (verbose)
+        ftylog_setVeboseMode(ftylog_getInstance());
     //  @selftest
 
     zactor_t *server = zactor_new (mlm_server, (void*) "Malamute");
@@ -227,7 +231,7 @@ fty_metric_cache_server_test (bool verbose)
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
-       
+
     // ===============================================
     // Test case #1:
     //      GET ups
@@ -277,7 +281,7 @@ fty_metric_cache_server_test (bool verbose)
     assert (encoded == NULL);
 
     zmsg_destroy (&reply);
-    
+
     // ===============================================
     // Test case #2:
     //      1. Change epdu data
@@ -443,7 +447,7 @@ fty_metric_cache_server_test (bool verbose)
     assert (encoded == NULL);
 
     zmsg_destroy (&reply);
-    
+
         // ===============================================
     // Test case #5:
     //      GET ups-.*
@@ -455,12 +459,12 @@ fty_metric_cache_server_test (bool verbose)
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
-    
+
     msg = fty_proto_encode_metric (NULL, time (NULL), 5, "temperature2", "ups-2", "2", "C");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
-    
+
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "12345");
     zmsg_addstr (send, "GET");
@@ -505,7 +509,7 @@ fty_metric_cache_server_test (bool verbose)
 
     zmsg_destroy (&reply);
     }
-    
+
    // ===============================================
     // Test case #6:
     //      GET ups-1 temperature1.$
@@ -517,12 +521,12 @@ fty_metric_cache_server_test (bool verbose)
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
-    
+
     msg = fty_proto_encode_metric (NULL, time (NULL), 5, "temperature100", "ups-1", "100", "C");
     rv = mlm_client_send (producer, "Nobody here cares about this.", &msg);
     assert (rv == 0);
     zclock_sleep (100);
-    
+
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "12345");
     zmsg_addstr (send, "GET");
@@ -562,7 +566,7 @@ fty_metric_cache_server_test (bool verbose)
 
     zmsg_destroy (&reply);
     }
-    
+
     // ===============================================
     // Test case #7:
     //      GET ups-.$ temperature.$
@@ -570,7 +574,7 @@ fty_metric_cache_server_test (bool verbose)
     //      2 measurements
     // ===============================================
     {
-    
+
     zmsg_t *send = zmsg_new ();
     zmsg_addstr (send, "12345");
     zmsg_addstr (send, "GET");
@@ -604,7 +608,7 @@ fty_metric_cache_server_test (bool verbose)
     fty_proto_t *proto = fty_proto_decode (&encoded);
     test_assert_proto (proto, "temperature1", "ups-1", "1", "C", 5);
     fty_proto_destroy (&proto);
-     
+
     encoded = zmsg_popmsg (reply);
     assert (encoded);
     proto = fty_proto_decode (&encoded);
@@ -616,7 +620,7 @@ fty_metric_cache_server_test (bool verbose)
 
     zmsg_destroy (&reply);
     }
-    
+
 
     zactor_destroy (&rt);
     mlm_client_destroy (&ui);

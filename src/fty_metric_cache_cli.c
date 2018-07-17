@@ -73,6 +73,7 @@ reciver (mlm_client_t *client, int timeout)
 
 int main (int argc, char *argv [])
 {
+    ftylog_setInstance("fty-metric-cache-cli", LOG_CONFIG);
 
     mlm_client_t *client = mlm_client_new ();
     if ( !client ) {
@@ -122,7 +123,9 @@ int main (int argc, char *argv [])
     }
 
     if (verbose)
-        zsys_info ("agent_rt_cli - Command line interface for agent-rt");
+        ftylog_setVeboseMode(ftylog_getInstance());
+
+    zsys_info ("agent_rt_cli - Command line interface for agent-rt");
 
     zmsg_t *msg = reciver (client, 1000);
     if (msg) {
