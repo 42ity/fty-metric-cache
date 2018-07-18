@@ -38,8 +38,6 @@ void
 fty_metric_cache_private_selftest (bool verbose, const char *subtest)
 {
 // Tests for stable private classes:
-    if (streq (subtest, "$ALL") || streq (subtest, "logger_test"))
-        logger_test (verbose);
     if (streq (subtest, "$ALL") || streq (subtest, "actor_commands_test"))
         actor_commands_test (verbose);
     if (streq (subtest, "$ALL") || streq (subtest, "rt_test"))

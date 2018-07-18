@@ -34,64 +34,38 @@
 static const char *ENDPOINT = "ipc://@/malamute";
 static const char *STATE_FILE = "/var/lib/fty/fty-metric-cache/state_file";
 
-#define DEFAULT_LOG_LEVEL LOG_WARNING
-
 void usage () {
     puts ("fty-metric-cache [options] ...\n"
-          "  --log-level / -l       bios log level\n"
-          "                         overrides setting in env. variable BIOS_LOG_LEVEL\n"
+          "  --verbose / -v         verbosity level\n"
           "  --state-file / -s      TODO\n"
           "  --help / -h            this information\n"
           );
 }
 
-int get_log_level (const char *level) {
-    if (streq (level, str(LOG_DEBUG))) {
-        return LOG_DEBUG;
-    }
-    else
-    if (streq (level, str(LOG_INFO))) {
-        return LOG_INFO;
-    }
-    else
-    if (streq (level, str(LOG_WARNING))) {
-        return LOG_WARNING;
-    }
-    else
-    if (streq (level, str(LOG_ERR))) {
-        return LOG_ERR;
-    }
-    else
-    if (streq (level, str(LOG_CRIT))) {
-        return LOG_CRIT;
-    }
-    return -1;
-}
-
-
 int main (int argc, char *argv [])
 {
     int help = 0;
-    int log_level = -1;
+    bool verbose = false;
     char *state_file = NULL;
 
+    ftylog_setInstance("fty-metric-cache", LOG_CONFIG);
     while (true) {
         static struct option long_options[] =
         {
             {"help",            no_argument,        0,  1},
-            {"log-level",       required_argument,  0,  'l'},
+            {"verbose",         no_argument,        0,  'v'},
             {"state-file",      required_argument,  0,  's'},
             {0,                 0,                  0,  0}
         };
 
         int option_index = 0;
-        int c = getopt_long (argc, argv, "hl:s:", long_options, &option_index);
+        int c = getopt_long (argc, argv, "hvs:", long_options, &option_index);
         if (c == -1)
             break;
         switch (c) {
-            case 'l':
+            case 'v':
             {
-                log_level = get_log_level (optarg);
+                verbose = true;
                 break;
             }
             case 's':
@@ -112,23 +86,8 @@ int main (int argc, char *argv [])
         return EXIT_FAILURE;
     }
 
-    // log_level cascade (priority ascending)
-    //  1. default value
-    //  2. env. variable
-    //  3. command line argument
-    //  4. actor message - NOT IMPLEMENTED YET
-    if (log_level == -1) {
-        char *env_log_level = getenv ("BIOS_LOG_LEVEL");
-        if (env_log_level) {
-            log_level = get_log_level (env_log_level);
-            if (log_level == -1)
-                log_level = DEFAULT_LOG_LEVEL;
-        }
-        else {
-            log_level = DEFAULT_LOG_LEVEL;
-        }
-    }
-    log_set_level (log_level);
+    if (verbose)
+        ftylog_setVeboseMode(ftylog_getInstance());
 
     // Set default state file on empty
     if (!state_file) {
@@ -137,7 +96,7 @@ int main (int argc, char *argv [])
 
     zactor_t *rt_server = zactor_new (fty_metric_cache_server, (void *) NULL);
     if (!rt_server) {
-        log_critical ("zactor_new (task = 'fty_metric_cache_server', args = 'NULL') failed");
+        log_fatal ("zactor_new (task = 'fty_metric_cache_server', args = 'NULL') failed");
         return EXIT_FAILURE;
     }
     zstr_sendx (rt_server,  "CONFIGURE", state_file, NULL);

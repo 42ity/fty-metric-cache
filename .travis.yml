@@ -25,9 +25,8 @@ sudo: false
 #dist:
 #- trusty
 
-# Note: was uncommented in earlier builds (TODO: Check if needed)
-services:
-- docker
+#services:
+#- docker
 
 # Set CI_TIME=true to enable build-step profiling in Travis
 # Set CI_TRACE=true to enable shell script tracing in Travis
@@ -70,6 +69,8 @@ pkg_deps_prereqs_source: &pkg_deps_prereqs_source
     - libczmq-dev
     - libmlm-dev
     - libfty-proto-dev
+    - log4cplus-dev
+    - libfty-common-logging-dev
 
 # NOTE: Our forks are checked out and built without pkg dependencies in use
 pkg_deps_prereqs: &pkg_deps_prereqs
@@ -117,8 +118,6 @@ matrix:
   - env: BUILD_TYPE=valgrind
     os: linux
     dist: trusty
-# Note: was uncommented in earlier builds (TODO: Check if needed)
-#    sudo: required
     addons:
       apt:
         sources: *pkg_src_zeromq_ubuntu14

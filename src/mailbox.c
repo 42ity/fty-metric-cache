@@ -65,7 +65,7 @@ mailbox_perform (mlm_client_t *client, zmsg_t **msg_p, rt_t *data)
     assert (client);
     assert (msg_p);
     assert (data);
-    
+
     if (!*msg_p)
         return;
     zmsg_t *msg = *msg_p;
@@ -228,7 +228,10 @@ mailbox_test (bool verbose)
 {
     static const char* endpoint = "inproc://fty-metric-cache-mailbox-test";
 
-    printf (" * mailbox: ");
+    ftylog_setInstance("mailbox","");
+
+    if (verbose)
+        ftylog_setVeboseMode(ftylog_getInstance());
     //  @selftest
 
     // Malamute
@@ -336,7 +339,7 @@ mailbox_test (bool verbose)
     assert (reply);
     mailbox_perform (mailbox, &reply, data);
 
-    zsys_debug ("Waiting in zpoller for 5000ms");
+    log_debug ("Waiting in zpoller for 5000ms");
     zpoller_t *poller = zpoller_new (mlm_client_msgpipe (ui), NULL);
     void *which = zpoller_wait (poller, 5000);
     assert (which == NULL);
@@ -393,5 +396,5 @@ mailbox_test (bool verbose)
     zactor_destroy (&server);
 
     //  @end
-    printf ("OK\n");
+    log_info ("OK\n");
 }

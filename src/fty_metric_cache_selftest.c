@@ -55,7 +55,6 @@ all_tests [] = {
 #ifdef FTY_METRIC_CACHE_BUILD_DRAFT_API
 // Tests for stable/draft private classes:
 // Now built only with --enable-drafts, so even stable builds are hidden behind the flag
-    { "logger", NULL, true, false, "logger_test" },
     { "actor_commands", NULL, true, false, "actor_commands_test" },
     { "rt", NULL, true, false, "rt_test" },
     { "mailbox", NULL, true, false, "mailbox_test" },
