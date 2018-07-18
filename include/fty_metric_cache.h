@@ -27,6 +27,6 @@
 
 //  Add your own public definitions here, if you need them
 #define FTY_METRIC_CACHE_MAILBOX "fty-metric-cache"
-#define LOG_CONFIG "/etc/fty/fty_log.cfg"
+#define LOG_CONFIG "/etc/fty/ftylog.cfg"
 
 #endif
