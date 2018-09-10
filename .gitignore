@@ -83,11 +83,7 @@ CMake*
 *.cmake
 
 # Repositories downloaded by CI integration scripts
-libsodium/
-libzmq/
-czmq/
-malamute/
-fty-proto/
+tmp-deps/
 
 # Travis build area
 tmp/
@@ -141,10 +137,10 @@ bindings/qt/selftest/selftest
 # Netbeans directory
 nbproject/
 
-# editor backups
-*~
-
 # configuration files AND their .in templates, as they are not used here
 # and the no_config flag in project.xml is broken
 src/fty-metric-cache.cfg.in
 src/fty-metric-cache.cfg
+
+# editor backups
+*~
