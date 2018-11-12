@@ -1,10 +1,8 @@
 # This is a skeleton created by zproject.
 # You can add hand-written code here.
 ### Note: Customized after generation; take care upon regens
-
 save.xml
 stderr.txt
-
 # Object files
 *.o
 *.so
@@ -83,11 +81,8 @@ CMake*
 *.cmake
 
 # Repositories downloaded by CI integration scripts
-libsodium/
-libzmq/
-czmq/
-malamute/
-fty-proto/
+# Repositories downloaded by CI integration scripts
+tmp-deps/
 
 # Travis build area
 tmp/
