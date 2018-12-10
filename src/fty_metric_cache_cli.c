@@ -74,7 +74,7 @@ reciver (mlm_client_t *client, int timeout)
 int main (int argc, char *argv [])
 {
     ftylog_setInstance("fty-metric-cache-cli", LOG_CONFIG);
-    ftylog_set
+    ftylog_setLogLevelInfo(ftylog_getInstance());
 
     mlm_client_t *client = mlm_client_new ();
     if ( !client ) {
