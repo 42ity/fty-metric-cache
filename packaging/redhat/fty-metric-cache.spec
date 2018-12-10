@@ -18,6 +18,7 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
+# MANUALLY EDITED to deliver /etc dir
 
 # To build with draft APIs, use "--with drafts" in rpmbuild for local builds or add
 #   Macros:
@@ -120,7 +121,7 @@ find %{buildroot} -name '*.a' | xargs rm -f
 find %{buildroot} -name '*.la' | xargs rm -f
 
 %files
-%defattr(-,root,root)
+%defattr(-,root,oot)
 %doc README.md
 %{_bindir}/fty-metric-cache
 %{_mandir}/man1/fty-metric-cache*
