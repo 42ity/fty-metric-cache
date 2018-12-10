@@ -121,7 +121,7 @@ find %{buildroot} -name '*.a' | xargs rm -f
 find %{buildroot} -name '*.la' | xargs rm -f
 
 %files
-%defattr(-,root,oot)
+%defattr(-,root,root)
 %doc README.md
 %{_bindir}/fty-metric-cache
 %{_mandir}/man1/fty-metric-cache*

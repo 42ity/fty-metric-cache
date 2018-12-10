@@ -488,6 +488,7 @@ dnl END of PKG_CHECK_MODULES and/or direct tests for libmlm
 ])
 dnl END of enabled attempts to search for libmlm
 
+
 was_log4cplus_check_lib_detected=no
 
 search_log4cplus="yes"
@@ -531,15 +532,15 @@ AS_IF([test x"${search_log4cplus}" = xyes], [
         log4cplus_synthetic_libs="-llog4cplus"
 
         if test -n "${with_log4cplus}" && test x"${with_log4cplus}" != xyes && test x"${with_log4cplus}" != xno; then
-            if test -r "${with_log4cplus}/include/log4cplus/logger.h"; then
+            if test -r "${with_log4cplus}/include/log4cplus/clogger.h"; then
                 log4cplus_synthetic_cflags="-I${with_log4cplus}/include"
                 log4cplus_synthetic_libs="-L${with_log4cplus}/lib -llog4cplus"
             else
-            AC_MSG_ERROR([Header file ${with_log4cplus}/include/log4cplus/logger.h was not found. Please check log4cplus prefix])
+            AC_MSG_ERROR([Header file ${with_log4cplus}/include/log4cplus/clogger.h was not found. Please check log4cplus prefix])
             fi
         else
-            AC_CHECK_HEADER([log4cplus/logger.h], [],
-            AC_MSG_ERROR([Header file log4cplus/logger.h was not found in default search paths])
+            AC_CHECK_HEADER([log4cplus/clogger.h], [],
+            AC_MSG_ERROR([Header file log4cplus/clogger.h was not found in default search paths])
                 )
         fi
 
@@ -692,7 +693,6 @@ AS_IF([test x"${search_libfty_proto}" = xyes], [
     PRE_SEARCH_LIBS="${LIBS}"
 
     found_pkgconfig=""
-    found_linkname=""
     PKG_CHECK_MODULES([fty_proto], [libfty_proto >= 1.0.0],
     [
         PKGCFG_LIBS_PRIVATE="$PKGCFG_LIBS_PRIVATE $fty_proto_LIBS"
@@ -722,7 +722,6 @@ AS_IF([test x"${search_libfty_proto}" = xyes], [
             [
                 was_fty_proto_check_lib_detected=yes
                 PKGCFG_LIBS_PRIVATE="$PKGCFG_LIBS_PRIVATE -lfty_proto"
-                found_linkname="fty_proto"
             ],
             [AC_MSG_ERROR([cannot link with -lfty_proto, install libfty_proto])])
     ])
@@ -730,12 +729,12 @@ AS_IF([test x"${search_libfty_proto}" = xyes], [
 dnl END of PKG_CHECK_MODULES and/or direct tests for libfty_proto
     AS_CASE(["x${was_fty_proto_check_lib_detected}"],
         [xpkgcfg], [
-                AC_SUBST([pkgconfig_name_libfty_proto],[${found_pkgconfig}])
+                AC_SUBST([pkgconfig_name_libfty_proto],["${found_pkgconfig} >= 1.0.0"])
                 CFLAGS="${fty_proto_CFLAGS} ${CFLAGS}"
                 LIBS="${fty_proto_LIBS} ${LIBS}"
             ],
         [xyes], [
-                AC_SUBST([pkgconfig_name_libfty_proto],[${found_linkname}])
+                AC_SUBST([pkgconfig_name_libfty_proto],[""])
                 CFLAGS="${fty_proto_synthetic_cflags} ${CFLAGS}"
                 LDFLAGS="${fty_proto_synthetic_libs} ${LDFLAGS}"
                 LIBS="${fty_proto_synthetic_libs} ${LIBS}"
@@ -744,7 +743,7 @@ dnl END of PKG_CHECK_MODULES and/or direct tests for libfty_proto
                 AC_SUBST([fty_proto_LIBS],[${fty_proto_synthetic_libs}])
             ],
         [xno], [
-                AC_SUBST([pkgconfig_name_libfty_proto],[libfty_proto])
+                AC_SUBST([pkgconfig_name_libfty_proto],[""])
             AC_MSG_ERROR([Cannot find pkg-config metadata for libfty_proto 1.0.0 or higher])
     ])
 ])
