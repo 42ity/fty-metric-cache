@@ -74,6 +74,7 @@ reciver (mlm_client_t *client, int timeout)
 int main (int argc, char *argv [])
 {
     ftylog_setInstance("fty-metric-cache-cli", LOG_CONFIG);
+    ftylog_setLogLevelInfo(ftylog_getInstance());
 
     mlm_client_t *client = mlm_client_new ();
     if ( !client ) {
@@ -125,7 +126,7 @@ int main (int argc, char *argv [])
     if (verbose)
         ftylog_setVeboseMode(ftylog_getInstance());
 
-    log_info ("agent_rt_cli - Command line interface for agent-rt");
+    //log_debug ("agent_rt_cli - Command line interface for agent-rt");
 
     zmsg_t *msg = reciver (client, 1000);
     if (msg) {
@@ -135,10 +136,10 @@ int main (int argc, char *argv [])
         char *reply = NULL;
         if(streq(command, "LIST")){
             reply = zmsg_popstr (msg);
-            log_debug ("%s", reply);
+            log_info ("%s", reply);
             free (reply);
         }else{
-            log_debug ("Device: %s\n", command);
+            log_info ("Device: %s", command);
             char _bufftime[sizeof "YYYY-MM-DDTHH:MM:SSZ"];
             zmsg_t *msg_part = zmsg_popmsg(msg);
             fty_proto_t *fty_p_element;
@@ -146,7 +147,7 @@ int main (int argc, char *argv [])
                 fty_p_element = fty_proto_decode(&msg_part);
                 uint64_t _time = fty_proto_time (fty_p_element);
                 strftime(_bufftime, sizeof _bufftime, "%FT%TZ", gmtime((const time_t*)&_time));
-                log_debug ("%s(ttl=%" PRIu32"s) %20s@%s = %s%s\n",
+                log_info ("%s(ttl=%" PRIu32"s) %20s@%s = %s%s",
                         _bufftime,
                         fty_proto_ttl (fty_p_element),
                         fty_proto_type (fty_p_element),
