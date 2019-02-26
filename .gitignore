@@ -138,7 +138,7 @@ bindings/qt/selftest/selftest
 nbproject/
 
 # configuration files AND their .in templates, as they are not used here
-# and the no_config flag in project.xml is broken
+# (Note: doubles for the no_config flag in project.xml just in case)
 src/fty-metric-cache.cfg.in
 src/fty-metric-cache.cfg
 
