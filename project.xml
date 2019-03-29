@@ -1,3 +1,5 @@
+<!-- WARNING : This component is obsoleted and no longer used in the product. -->
+
 <project
     name = "fty-metric-cache"
     description = "Knows current values of any METRIC in the system"
