@@ -1,5 +1,7 @@
 # fty-metric-cache
 
+WARNING : This component is obsoleted and no longer used in the product.
+
 Agent fty-metric-cache serves as in-memory cache of most recent metrics.
 
 ## How to build
