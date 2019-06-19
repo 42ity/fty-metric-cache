@@ -34,8 +34,6 @@
 //  External API
 #include "../include/fty_metric_cache.h"
 
-//  Extra headers
-
 //  Opaque class structures to allow forward references
 #ifndef ACTOR_COMMANDS_T_DEFINED
 typedef struct _actor_commands_t actor_commands_t;
@@ -54,6 +52,8 @@ struct _rt_t {
 typedef struct _mailbox_t mailbox_t;
 #define MAILBOX_T_DEFINED
 #endif
+
+//  Extra headers
 
 //  Internal API
 
