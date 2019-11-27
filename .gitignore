@@ -1,10 +1,8 @@
 # This is a skeleton created by zproject.
 # You can add hand-written code here.
-### Note: Customized after generation; take care upon regens
+### Note: General ignorance of CMake files has been added in gitignore; take care upon regens
 
 save.xml
-stderr.txt
-
 # Object files
 *.o
 *.so
@@ -77,11 +75,6 @@ DartConfiguration.tcl
 install_manifest.txt
 Testing/
 
-# CMake in general
-builds/cmake/
-CMake*
-*.cmake
-
 # Repositories downloaded by CI integration scripts
 tmp-deps/
 
@@ -137,10 +130,9 @@ bindings/qt/selftest/selftest
 # Netbeans directory
 nbproject/
 
-# configuration files AND their .in templates, as they are not used here
-# (Note: doubles for the no_config flag in project.xml just in case)
-src/fty-metric-cache.cfg.in
-src/fty-metric-cache.cfg
-
 # editor backups
 *~
+# CMake in general
+builds/cmake/
+CMake*
+*.cmake

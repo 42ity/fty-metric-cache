@@ -1,0 +1,6 @@
+   fty-metric-cache -> libsodium;
+   fty-metric-cache -> libzmq;
+   fty-metric-cache -> czmq;
+   fty-metric-cache -> malamute;
+   fty-metric-cache -> fty-common-logging;
+   fty-metric-cache -> fty-proto;
