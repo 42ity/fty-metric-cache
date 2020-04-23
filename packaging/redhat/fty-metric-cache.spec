@@ -2,7 +2,7 @@
 #    fty-metric-cache - Knows current values of any METRIC in the system
 # Note: this file was amended after generation, take care to keep it that way
 #
-#    Copyright (C) 2014 - 2018 Eaton
+#    Copyright (C) 2014 - 2020 Eaton
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
